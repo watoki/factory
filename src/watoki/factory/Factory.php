@@ -5,30 +5,40 @@ class Factory {
 
     public $singletons = array();
 
+    function __construct() {
+        $this->setSingleton(__CLASS__, $this);
+    }
+
     /**
      * @param $class
-     * @param array $args Arguments other than the factory
-     * @return mixed
+     * @param array $args Constructor arguments that cannot be provided by the factory (indexed by parameter name)
+     * @return mixed An instance of the given class
+     * @throws \Exception If the class or an injected class cannot be constructed
      */
     public function get($class, $args = array()) {
-        $reflClass = new \ReflectionClass($class);
-
         if (isset($this->singletons[$class])) {
             return $this->singletons[$class];
         }
 
-        if ($reflClass->getConstructor()) {
-            array_unshift($args, $this);
-            $instance = $reflClass->newInstanceArgs($args);
-        } else {
-            $instance = $reflClass->newInstance();
+        $reflClass = new \ReflectionClass($class);
+        if (!$reflClass->getConstructor()) {
+            return $reflClass->newInstance();
+        }
+        $argArray = array();
+        foreach ($reflClass->getConstructor()->getParameters() as $param) {
+
+            if (array_key_exists($param->getName(), $args)) {
+                $argArray[] = $args[$param->getName()];
+            } else if ($param->getClass()) {
+                $argArray[] = $this->get($param->getClass()->getName());
+            } else if ($param->isDefaultValueAvailable()) {
+                $argArray[] = $param->getDefaultValue();
+            } else {
+                throw new \Exception("Argument [{$param->getName()}] missing for constructor of [{$reflClass->getShortName()}].");
+            }
         }
 
-        if ($this->isSingleton($reflClass)) {
-            $this->setSingleton($class, $instance);
-        }
-
-        return $instance;
+        return $reflClass->newInstanceArgs($argArray);
     }
 
     /**
@@ -38,13 +48,5 @@ class Factory {
      */
     public function setSingleton($class, $instance) {
         return $this->singletons[$class] = $instance;
-    }
-
-    /**
-     * @param $reflClass
-     * @return boolean
-     */
-    private function isSingleton(\ReflectionClass $reflClass) {
-        return $reflClass->getStaticPropertyValue('isSingleton', false);
     }
 }
