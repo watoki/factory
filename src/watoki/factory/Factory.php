@@ -15,7 +15,7 @@ class Factory {
      * @return mixed An instance of the given class
      * @throws \Exception If the class or an injected class cannot be constructed
      */
-    public function get($class, $args = array()) {
+    public function getInstance($class, $args = array()) {
         if (isset($this->singletons[$class])) {
             return $this->singletons[$class];
         }
@@ -30,7 +30,7 @@ class Factory {
             if (array_key_exists($param->getName(), $args)) {
                 $argArray[] = $args[$param->getName()];
             } else if ($param->getClass()) {
-                $argArray[] = $this->get($param->getClass()->getName());
+                $argArray[] = $this->getInstance($param->getClass()->getName());
             } else if ($param->isDefaultValueAvailable()) {
                 $argArray[] = $param->getDefaultValue();
             } else {

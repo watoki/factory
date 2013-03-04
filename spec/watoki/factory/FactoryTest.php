@@ -150,11 +150,11 @@ class FactoryTest_When {
     }
 
     public function iGet_FromTheFactory($className) {
-        $this->instance = $this->factory->get($className);
+        $this->instance = $this->factory->getInstance($className);
     }
 
     public function iGet_WithArguments_FromTheFactory($className, $args) {
-        $this->instance = $this->factory->get($className, $args);
+        $this->instance = $this->factory->getInstance($className, $args);
     }
 
     public function iTryToGet_WithArguments_FromTheFactory($className, $args) {
@@ -166,7 +166,7 @@ class FactoryTest_When {
     }
 
     public function iGet_FromTheFactoryAgain($className) {
-        $this->instance2 = $this->factory->get($className);
+        $this->instance2 = $this->factory->getInstance($className);
     }
 }
 
