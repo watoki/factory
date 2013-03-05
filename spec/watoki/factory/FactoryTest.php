@@ -112,6 +112,24 @@ class FactoryTest extends \PHPUnit_Framework_TestCase {
         $this->then->theTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
+    public function testNonExistingSingleton() {
+        $this->when->iTryToGetTheSingleton('NonExistingSingleton');
+        $this->then->anExceptionShouldBeThrown();
+    }
+
+    public function testGetExistingSingleton() {
+        $this->given->theClass('class SomeSingleton {
+            function __construct(\watoki\factory\Factory $factory, $arg) {
+                $factory->setSingleton(__CLASS__, $this);
+                $this->arg = $arg;
+            }
+        }');
+        $this->when->iGet_WithArguments_FromTheFactory('SomeSingleton', array('arg' => 'Special Argument'));
+        $this->when->iTryToGetTheSingleton('SomeSingleton');
+        $this->then->theObjectShouldBeAnInstanceOf('SomeSingleton');
+        $this->then->theTheProperty_OfTheObjectShouldBe('arg', 'Special Argument');
+    }
+
     /////////////////////////////// SET-UP ///////////////////////////////////
 
     /** @var FactoryTest_Given */
@@ -167,6 +185,18 @@ class FactoryTest_When {
 
     public function iGet_FromTheFactoryAgain($className) {
         $this->instance2 = $this->factory->getInstance($className);
+    }
+
+    public function iTryToGetTheSingleton($className) {
+        try {
+            $this->iGetTheSingleton($className);
+        } catch (\Exception $e) {
+            $this->caught = $e;
+        }
+    }
+
+    private function iGetTheSingleton($className) {
+        $this->instance = $this->factory->getSingleton($className);
     }
 }
 

@@ -10,6 +10,10 @@ class Factory {
     }
 
     /**
+     * Returns an instance of the given class.
+     *
+     * If the class was registed as singleton, the previous instance is returned regardless of the arguments.
+     *
      * @param $class
      * @param array $args Constructor arguments that cannot be provided by the factory (indexed by parameter name)
      * @return mixed An instance of the given class
@@ -39,6 +43,22 @@ class Factory {
         }
 
         return $reflClass->newInstanceArgs($argArray);
+    }
+
+    /**
+     * Returns the previously as singleton registered instance.
+     *
+     * Use this method if you expect the instance to have been created centrally.
+     *
+     * @param string $class
+     * @return mixed The already existing instance of the given class
+     * @throws \Exception
+     */
+    public function getSingleton($class) {
+        if (!isset($this->singletons[$class])) {
+            throw new \Exception("Instance of [$class] does not exist.");
+        }
+        return $this->singletons[$class];
     }
 
     /**
