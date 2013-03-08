@@ -130,6 +130,16 @@ class FactoryTest extends \PHPUnit_Framework_TestCase {
         $this->then->theTheProperty_OfTheObjectShouldBe('arg', 'Special Argument');
     }
 
+    public function testOptionalClassArgument() {
+        $this->given->theClass('class OptionalClassArgument {
+            function __construct(\DateTime $date = null) {
+                $this->date = $date;
+            }
+        }');
+        $this->when->iGet_FromTheFactory('OptionalClassArgument');
+        $this->then->theTheProperty_OfTheObjectShouldBe('date', null);
+    }
+
     /////////////////////////////// SET-UP ///////////////////////////////////
 
     /** @var FactoryTest_Given */

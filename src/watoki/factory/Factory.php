@@ -33,10 +33,10 @@ class Factory {
 
             if (array_key_exists($param->getName(), $args)) {
                 $argArray[] = $args[$param->getName()];
-            } else if ($param->getClass()) {
-                $argArray[] = $this->getInstance($param->getClass()->getName());
             } else if ($param->isDefaultValueAvailable()) {
                 $argArray[] = $param->getDefaultValue();
+            } else if ($param->getClass()) {
+                $argArray[] = $this->getInstance($param->getClass()->getName());
             } else {
                 throw new \Exception("Argument [{$param->getName()}] missing for constructor of [{$reflClass->getShortName()}].");
             }
