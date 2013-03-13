@@ -42,7 +42,8 @@ class Factory {
             }
         }
 
-        return $reflClass->newInstanceArgs($argArray);
+        $newInstanceArgs = $reflClass->newInstanceArgs($argArray);
+        return $newInstanceArgs;
     }
 
     /**
