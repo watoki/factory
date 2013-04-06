@@ -3,6 +3,8 @@ namespace watoki\factory;
 
 class Factory {
 
+    static $CLASS = __CLASS__;
+
     public $singletons = array();
 
     function __construct() {
