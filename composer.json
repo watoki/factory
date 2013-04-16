@@ -2,7 +2,7 @@
     "name": "watoki/factory",
     "description": "A simple dependency injection container for PHP",
     "keywords": ["dependency injection", "watoki"],
-    "homepage": "http://github.com/watoki/c2",
+    "homepage": "http://github.com/watoki/factory",
     "type": "library",
     "license": "MIT",
     "authors": [
