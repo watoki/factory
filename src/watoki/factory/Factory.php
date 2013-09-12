@@ -26,7 +26,12 @@ class Factory {
             return $this->singletons[$class];
         }
 
-        $reflClass = new \ReflectionClass($class);
+        try {
+            $reflClass = new \ReflectionClass($class);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException("Class [$class] doe not exist.");
+        }
+
         if (!$reflClass->getConstructor()) {
             return $reflClass->newInstance();
         }
