@@ -1,14 +1,20 @@
 <?php
 namespace watoki\factory;
 
+use watoki\factory\providers\DefaultProvider;
+
 class Factory {
 
     static $CLASS = __CLASS__;
 
-    public $singletons = array();
+    private $singletons = array();
+
+    /** @var array|Provider[] */
+    private $providers = array();
 
     function __construct() {
         $this->setSingleton(__CLASS__, $this);
+        $this->setProvider(null, new DefaultProvider($this));
     }
 
     /**
@@ -26,30 +32,7 @@ class Factory {
             return $this->singletons[$class];
         }
 
-        try {
-            $reflClass = new \ReflectionClass($class);
-        } catch (\ReflectionException $e) {
-            throw new \InvalidArgumentException("Class [$class] doe not exist.");
-        }
-
-        if (!$reflClass->getConstructor()) {
-            return $reflClass->newInstance();
-        }
-        $argArray = array();
-        foreach ($reflClass->getConstructor()->getParameters() as $param) {
-
-            if (array_key_exists($param->getName(), $args)) {
-                $argArray[] = $args[$param->getName()];
-            } else if ($param->isDefaultValueAvailable()) {
-                $argArray[] = $param->getDefaultValue();
-            } else if ($param->getClass()) {
-                $argArray[] = $this->getInstance($param->getClass()->getName());
-            } else {
-                throw new \Exception("Argument [{$param->getName()}] missing for constructor of [{$reflClass->getShortName()}].");
-            }
-        }
-
-        return $reflClass->newInstanceArgs($argArray);
+        return $this->findMatchingProvider($class)->provide($class, $args);
     }
 
     /**
@@ -75,5 +58,13 @@ class Factory {
      */
     public function setSingleton($class, $instance) {
         return $this->singletons[$class] = $instance;
+    }
+
+    public function setProvider($class, Provider $provider) {
+        $this->providers[$class] = $provider;
+    }
+
+    private function findMatchingProvider($class) {
+        return $this->providers[null];
     }
 }
