@@ -14,7 +14,7 @@ class Factory {
 
     function __construct() {
         $this->setSingleton(__CLASS__, $this);
-        $this->setProvider(null, new DefaultProvider($this));
+        $this->setProvider('stdClass', new DefaultProvider($this));
     }
 
     /**
@@ -73,7 +73,7 @@ class Factory {
             }
             $class = get_parent_class($class);
         }
-        return $this->providers[null];
+        return $this->providers['stdclass'];
     }
 
     private function normalizeClass($class) {
