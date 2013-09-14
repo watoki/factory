@@ -7,14 +7,14 @@ use watoki\scrut\Specification;
 
 class FactoryFixture extends Fixture {
 
-    private $instance;
+    public $caught;
 
-    private $caught;
+    public $instance;
 
-    private $instance2;
+    public $instance2;
 
     /** @var Factory */
-    private $factory;
+    public $factory;
 
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
@@ -67,6 +67,7 @@ class FactoryFixture extends Fixture {
 
     public function thenTheObjectShouldBeAnInstanceOf($className) {
         $this->spec->assertInstanceOf($className, $this->instance);
+        $this->spec->assertEquals($className, get_class($this->instance));
     }
 
     public function thenTheTheProperty_OfTheObjectShouldBe($prop, $value) {
