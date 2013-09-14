@@ -1,10 +1,11 @@
 <?php
-namespace spec\watoki\factory;
+namespace spec\watoki\factory\factory;
 
+use spec\watoki\factory\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
- * @property FactoryFixture factoryFix <-
+ * @property \spec\watoki\factory\factory\FactoryFixture factoryFix <-
  */
 class ProviderTest extends Specification {
 

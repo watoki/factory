@@ -3,6 +3,8 @@ namespace watoki\factory;
 
 class Injector {
 
+    const INJECTION_MARKER = '<-';
+
     private $factory;
 
     function __construct(Factory $factory) {
@@ -10,11 +12,7 @@ class Injector {
     }
 
     public function injectConstructor($class, $args) {
-        try {
-            $reflection = new \ReflectionClass($class);
-        } catch (\ReflectionException $e) {
-            throw new \InvalidArgumentException("Class [$class] doe not exist.");
-        }
+        $reflection = new \ReflectionClass($class);
 
         if (!$reflection->getConstructor()) {
             return $reflection->newInstance();
@@ -42,5 +40,32 @@ class Injector {
             }
         }
         return $argArray;
+    }
+
+    public function injectPropertyAnnotations($object, $marker = self::INJECTION_MARKER) {
+        $classReflection = new \ReflectionClass($object);
+        $resolver = new ClassResolver($classReflection);
+
+        $matches = array();
+        preg_match_all('/@property\s+(\S+)\s+\$?(\S+)\s*' . $marker .'/', $classReflection->getDocComment(), $matches);
+
+        foreach ($matches[0] as $i => $match) {
+            $className = $matches[1][$i];
+            $property = $matches[2][$i];
+
+            $class = $resolver->resolve($className);
+
+            if (!$class) {
+                throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+            }
+
+            if ($classReflection->hasProperty($property)) {
+                $reflectionProperty = $classReflection->getProperty($property);
+                $reflectionProperty->setAccessible(true);
+                $reflectionProperty->setValue($object, $this->factory->getInstance($class));
+            } else {
+                $object->$property = $this->factory->getInstance($class);
+            }
+        }
     }
 }

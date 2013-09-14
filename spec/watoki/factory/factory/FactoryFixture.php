@@ -1,5 +1,5 @@
 <?php
-namespace spec\watoki\factory;
+namespace spec\watoki\factory\factory;
 
 use watoki\factory\Factory;
 use watoki\scrut\Fixture;
