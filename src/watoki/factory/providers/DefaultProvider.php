@@ -7,7 +7,7 @@ use watoki\factory\Provider;
 
 class DefaultProvider implements Provider {
 
-    private $injector;
+    protected $injector;
 
     public function __construct(Factory $factory) {
         $this->injector = new Injector($factory);

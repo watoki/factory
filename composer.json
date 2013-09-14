@@ -13,7 +13,11 @@
         }
     ],
     "require": {
+        "nikic/php-parser": "0.9.4",
         "php": ">=5.3.8"
+    },
+    "require-dev": {
+        "watoki/scrut":"*"
     },
     "autoload": {
         "psr-0": {
