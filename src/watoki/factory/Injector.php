@@ -5,6 +5,9 @@ class Injector {
 
     const INJECTION_MARKER = '<-';
 
+    /**
+     * @var Factory
+     */
     private $factory;
 
     function __construct(Factory $factory) {
@@ -59,22 +62,39 @@ class Injector {
                 continue;
             }
 
-            $className = $matches[1][$i];
-            $property = $matches[2][$i];
+            $this->injectProperty($matches[2][$i], $object, $resolver, $matches[1][$i], $classReflection);
+        }
+    }
 
-            $class = $resolver->resolve($className);
+    public function injectProperties($object, $filter) {
+        $classReflection = new \ReflectionClass($object);
+        $resolver = new ClassResolver($classReflection);
 
-            if (!$class) {
-                throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+        foreach ($classReflection->getProperties() as $property) {
+            $matches = array();
+            preg_match('/@var\s+(\S+).*/', $property->getDocComment(), $matches);
+
+            if (empty($matches) || !$filter($property->getDocComment())) {
+                continue;
             }
 
-            if ($classReflection->hasProperty($property)) {
-                $reflectionProperty = $classReflection->getProperty($property);
-                $reflectionProperty->setAccessible(true);
-                $reflectionProperty->setValue($object, $this->factory->getInstance($class));
-            } else {
-                $object->$property = $this->factory->getInstance($class);
-            }
+            $this->injectProperty($property->getName(), $object, $resolver, $matches[1], $classReflection);
+        }
+    }
+
+    private function injectProperty($property, $object, ClassResolver $resolver, $className, \ReflectionClass $classReflection) {
+        $class = $resolver->resolve($className);
+
+        if (!$class) {
+            throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+        }
+
+        if ($classReflection->hasProperty($property)) {
+            $reflectionProperty = $classReflection->getProperty($property);
+            $reflectionProperty->setAccessible(true);
+            $reflectionProperty->setValue($object, $this->factory->getInstance($class));
+        } else {
+            $object->$property = $this->factory->getInstance($class);
         }
     }
 }
