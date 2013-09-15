@@ -42,14 +42,23 @@ class Injector {
         return $argArray;
     }
 
-    public function injectPropertyAnnotations($object, $marker = self::INJECTION_MARKER) {
+    /**
+     * @param object $object The object that the properties are injected into
+     * @param callable $filter Function to determine if the passed property annotation should be included
+     * @throws \Exception
+     */
+    public function injectPropertyAnnotations($object, $filter) {
         $classReflection = new \ReflectionClass($object);
         $resolver = new ClassResolver($classReflection);
 
         $matches = array();
-        preg_match_all('/@property\s+(\S+)\s+\$?(\S+)\s*' . $marker .'/', $classReflection->getDocComment(), $matches);
+        preg_match_all('/@property\s+(\S+)\s+\$?(\S+).*/', $classReflection->getDocComment(), $matches);
 
         foreach ($matches[0] as $i => $match) {
+            if (!$filter(trim($match))) {
+                continue;
+            }
+
             $className = $matches[1][$i];
             $property = $matches[2][$i];
 

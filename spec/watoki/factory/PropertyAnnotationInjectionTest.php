@@ -59,7 +59,6 @@ class PropertyAnnotationInjectionTest extends Specification {
             /**
              * @property        StdClass    tabs    <-
              * @property    StdClass    spaces   <-
-             * @property StdClass noSpace<-
              */
         ');
 
@@ -67,7 +66,6 @@ class PropertyAnnotationInjectionTest extends Specification {
 
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('tabs', 'StdClass');
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('spaces', 'StdClass');
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('noSpace', 'StdClass');
     }
 
     public function testDontInjectNotMarkedProperties() {
