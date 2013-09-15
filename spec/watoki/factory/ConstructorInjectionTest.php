@@ -1,22 +1,22 @@
 <?php
-namespace spec\watoki\factory\factory;
+namespace spec\watoki\factory;
 
-use spec\watoki\factory\factory\FactoryFixture;
+use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
- * @property \spec\watoki\factory\factory\FactoryFixture factoryFix <-
+ * @property \spec\watoki\factory\FactoryFixture factoryFix <-
  */
 class ConstructorInjectionTest extends Specification {
 
     public function testEmptyConstructor() {
-        $this->factoryFix->givenTheClass('class SomeClass {}');
+        $this->factoryFix->givenTheClassDefinition('class SomeClass {}');
         $this->factoryFix->whenIGet_FromTheFactory('SomeClass');
         $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('SomeClass');
     }
 
     public function testConstructorArguments() {
-        $this->factoryFix->givenTheClass('class ClassWithConstructor {
+        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructor {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
@@ -27,7 +27,7 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testDefaultArguments() {
-        $this->factoryFix->givenTheClass('class DefaultArguments {
+        $this->factoryFix->givenTheClassDefinition('class DefaultArguments {
             function __construct($argRequired, $argDefault = " World") {
                 $this->msg = $argRequired . $argDefault;
             }
@@ -38,7 +38,7 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testMissingArguments() {
-        $this->factoryFix->givenTheClass('class MissingArgument {
+        $this->factoryFix->givenTheClassDefinition('class MissingArgument {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
@@ -48,12 +48,12 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testInjectArgumentsByFactory() {
-        $this->factoryFix->givenTheClass('class InjectMe {
+        $this->factoryFix->givenTheClassDefinition('class InjectMe {
             function __construct($msg = "Hello World") {
                 $this->greeting = $msg;
             }
         }');
-        $this->factoryFix->givenTheClass('class InjectingOne {
+        $this->factoryFix->givenTheClassDefinition('class InjectingOne {
             function __construct(InjectMe $arg1) {
                 $this->msg = $arg1->greeting;
             }
@@ -63,12 +63,12 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testMixGivenAndInjectedArguments() {
-        $this->factoryFix->givenTheClass('class InjectMeToo {
+        $this->factoryFix->givenTheClassDefinition('class InjectMeToo {
             function __construct($msg = "Hello") {
                 $this->greeting = $msg;
             }
         }');
-        $this->factoryFix->givenTheClass('class InjectingTwo {
+        $this->factoryFix->givenTheClassDefinition('class InjectingTwo {
             function __construct(InjectMeToo $arg1, $arg2, $arg3 = "!") {
                 $this->msg = $arg1->greeting . $arg2 . $arg3;
             }
@@ -78,7 +78,7 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testInjectFactory() {
-        $this->factoryFix->givenTheClass('class InjectFactory {
+        $this->factoryFix->givenTheClassDefinition('class InjectFactory {
             function __construct(\watoki\factory\Factory $factory) {
                 $this->factory = $factory;
             }
@@ -88,17 +88,17 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testRecursiveInjection() {
-        $this->factoryFix->givenTheClass('class RecursiveInjectionOne {
+        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionOne {
             function __construct($msg = "Hello") {
                 $this->msg = $msg;
             }
         }');
-        $this->factoryFix->givenTheClass('class RecursiveInjectionTwo {
+        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionTwo {
             function __construct(RecursiveInjectionOne $one, $msg = " World") {
                 $this->msg = $one->msg . $msg;
             }
         }');
-        $this->factoryFix->givenTheClass('class RecursiveInjectionThree {
+        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionThree {
             function __construct(RecursiveInjectionTwo $two) {
                 $this->msg = $two->msg;
             }
@@ -108,7 +108,7 @@ class ConstructorInjectionTest extends Specification {
     }
 
     public function testOptionalClassArgument() {
-        $this->factoryFix->givenTheClass('class OptionalClassArgument {
+        $this->factoryFix->givenTheClassDefinition('class OptionalClassArgument {
             function __construct(\DateTime $date = null) {
                 $this->date = $date;
             }

@@ -1,7 +1,7 @@
 <?php
-namespace spec\watoki\factory\factory;
+namespace spec\watoki\factory;
 
-use spec\watoki\factory\factory\FactoryFixture;
+use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
@@ -10,7 +10,7 @@ use watoki\scrut\Specification;
 class SingletonTest extends Specification {
 
     public function testSingleton() {
-        $this->factoryFix->givenTheClass('class Singleton {
+        $this->factoryFix->givenTheClassDefinition('class Singleton {
             function __construct(\watoki\factory\Factory $factory) {
                 $factory->setSingleton(__CLASS__, $this);
             }
@@ -26,7 +26,7 @@ class SingletonTest extends Specification {
     }
 
     public function testGetExistingSingleton() {
-        $this->factoryFix->givenTheClass('class SomeSingleton {
+        $this->factoryFix->givenTheClassDefinition('class SomeSingleton {
             function __construct(\watoki\factory\Factory $factory, $arg) {
                 $factory->setSingleton(__CLASS__, $this);
                 $this->arg = $arg;

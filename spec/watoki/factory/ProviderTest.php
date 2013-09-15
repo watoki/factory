@@ -1,11 +1,11 @@
 <?php
-namespace spec\watoki\factory\factory;
+namespace spec\watoki\factory;
 
-use spec\watoki\factory\factory\FactoryFixture;
+use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
- * @property \spec\watoki\factory\factory\FactoryFixture factoryFix <-
+ * @property \spec\watoki\factory\FactoryFixture factoryFix <-
  */
 class ProviderTest extends Specification {
 
@@ -20,10 +20,10 @@ class ProviderTest extends Specification {
     }
 
     public function testFindBaseProvider() {
-        $this->factoryFix->givenTheClass('
+        $this->factoryFix->givenTheClassDefinition('
             class BaseClass {}
         ');
-        $this->factoryFix->givenTheClass('
+        $this->factoryFix->givenTheClassDefinition('
             class SubClass extends BaseClass {}
         ');
 
@@ -37,10 +37,10 @@ class ProviderTest extends Specification {
     }
 
     public function testFindSpecificProviderFirst() {
-        $this->factoryFix->givenTheClass('
+        $this->factoryFix->givenTheClassDefinition('
             class Base2Class {}
         ');
-        $this->factoryFix->givenTheClass('
+        $this->factoryFix->givenTheClassDefinition('
             class Sub2Class extends BaseClass {}
         ');
 
@@ -67,7 +67,7 @@ class ProviderTest extends Specification {
     }
 
     private function givenTheProvider_Providing($providerName, $statement) {
-        $this->factoryFix->givenTheClass("
+        $this->factoryFix->givenTheClassDefinition("
             class $providerName implements \\watoki\\factory\\Provider {
                 public function provide(\$class, array \$args = array()) {
                     $statement
