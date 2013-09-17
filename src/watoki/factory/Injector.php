@@ -28,21 +28,22 @@ class Injector {
         }
     }
 
-    private function injectMethodArguments(\ReflectionMethod $method, array $args) {
+    public function injectMethodArguments(\ReflectionMethod $method, array $args) {
         $argArray = array();
         foreach ($method->getParameters() as $i => $param) {
             if (array_key_exists($param->getName(), $args)) {
-                $argArray[] = $args[$param->getName()];
+                $arg = $args[$param->getName()];
             } else if (array_key_exists($i, $args)) {
-                $argArray[] = $args[$i];
+                $arg = $args[$i];
             } else if ($param->isDefaultValueAvailable()) {
-                $argArray[] = $param->getDefaultValue();
+                $arg = $param->getDefaultValue();
             } else if ($param->getClass()) {
-                $argArray[] = $this->factory->getInstance($param->getClass()->getName());
+                $arg = $this->factory->getInstance($param->getClass()->getName());
             } else {
                 throw new \Exception("Cannot inject parameter [{$param->getName()}]. No class or value given in "
                         . json_encode(array_keys($args)));
             }
+            $argArray[$param->getName()] = $arg;
         }
         return $argArray;
     }
