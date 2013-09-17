@@ -13,7 +13,7 @@ class Factory {
     private $providers = array();
 
     function __construct() {
-        $this->setSingleton(__CLASS__, $this);
+        $this->setSingleton(get_class($this), $this);
         $this->setProvider('stdClass', new DefaultProvider($this));
     }
 
