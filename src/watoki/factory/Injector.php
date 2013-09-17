@@ -30,9 +30,11 @@ class Injector {
 
     private function injectMethodArguments(\ReflectionMethod $method, array $args) {
         $argArray = array();
-        foreach ($method->getParameters() as $param) {
+        foreach ($method->getParameters() as $i => $param) {
             if (array_key_exists($param->getName(), $args)) {
                 $argArray[] = $args[$param->getName()];
+            } else if (array_key_exists($i, $args)) {
+                $argArray[] = $args[$i];
             } else if ($param->isDefaultValueAvailable()) {
                 $argArray[] = $param->getDefaultValue();
             } else if ($param->getClass()) {

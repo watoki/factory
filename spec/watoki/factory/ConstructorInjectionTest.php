@@ -22,7 +22,32 @@ class ConstructorInjectionTest extends Specification {
             }
         }');
         $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructor', array('arg2' => ' World', 'arg1' => 'Hello'));
+
         $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('ClassWithConstructor');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+    }
+
+    public function testConstructorArgumentsInList() {
+        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructorInList {
+            function __construct($arg1, $arg2) {
+                $this->msg = $arg1 . $arg2;
+            }
+        }');
+
+        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorInList', array('Hello', ' You'));
+
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello You');
+    }
+
+    public function testConstructorArgumentsMixed() {
+        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructorMixed {
+            function __construct($arg1, $arg2) {
+                $this->msg = $arg1 . $arg2;
+            }
+        }');
+
+        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorMixed', array('arg2' => ' World', 0 => 'Hello'));
+
         $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
