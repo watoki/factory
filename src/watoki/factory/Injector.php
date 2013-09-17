@@ -51,10 +51,11 @@ class Injector {
     /**
      * @param object $object The object that the properties are injected into
      * @param callable $filter Function to determine if the passed property annotation should be included
+     * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
      * @throws \Exception
      */
-    public function injectPropertyAnnotations($object, $filter) {
-        $classReflection = new \ReflectionClass($object);
+    public function injectPropertyAnnotations($object, $filter, \ReflectionClass $context = null) {
+        $classReflection = $context ?: new \ReflectionClass($object);
         $resolver = new ClassResolver($classReflection);
 
         $matches = array();
@@ -69,8 +70,14 @@ class Injector {
         }
     }
 
-    public function injectProperties($object, $filter) {
-        $classReflection = new \ReflectionClass($object);
+    /**
+     * @param object $object The object that the properties are injected into
+     * @param callable $filter Function to determine if the passed \ReflectionProperty should be included
+     * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
+     * @throws \Exception
+     */
+    public function injectProperties($object, $filter, \ReflectionClass $context = null) {
+        $classReflection = $context ?: new \ReflectionClass($object);
         $resolver = new ClassResolver($classReflection);
 
         foreach ($classReflection->getProperties() as $property) {
