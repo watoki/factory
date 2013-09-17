@@ -15,11 +15,12 @@ class PropertyInjectionProvider extends DefaultProvider {
         parent::__construct($factory);
         $this->includingAnnotations = $includingAnnotationProperties;
 
-        $filter = function ($annotation) {
+        $this->annotationFilter = function ($annotation) {
             return strpos($annotation, '<-') !== false;
         };
-        $this->annotationFilter = $filter;
-        $this->propertyFilter = $filter;
+        $this->propertyFilter = function (\ReflectionProperty $property) {
+            return strpos($property->getDocComment(), '<-') !== false;
+        };
     }
 
     public function provide($class, array $args = array()) {

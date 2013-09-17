@@ -77,7 +77,7 @@ class Injector {
             $matches = array();
             preg_match('/@var\s+(\S+).*/', $property->getDocComment(), $matches);
 
-            if (empty($matches) || !$filter($property->getDocComment())) {
+            if (empty($matches) || !$filter($property)) {
                 continue;
             }
 

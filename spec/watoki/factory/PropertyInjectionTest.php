@@ -82,8 +82,8 @@ class PropertyInjectionTest extends Specification {
     }
 
     private function givenOnlyPropertiesWithTheAnnotation_ShouldBeInjected($annotation) {
-        $this->provider->setPropertyFilter(function ($doc) use ($annotation) {
-            return strpos($doc, $annotation) !== false;
+        $this->provider->setPropertyFilter(function (\ReflectionProperty $property) use ($annotation) {
+            return strpos($property->getDocComment(), $annotation) !== false;
         });
     }
 
