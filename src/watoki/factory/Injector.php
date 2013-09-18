@@ -40,8 +40,16 @@ class Injector {
             } else if ($param->getClass()) {
                 $arg = $this->factory->getInstance($param->getClass()->getName());
             } else {
-                throw new \Exception("Cannot inject parameter [{$param->getName()}]. No class or value given in "
-                        . json_encode(array_keys($args)));
+                $matches = array();
+                $pattern = '/@param\s+(\S+)\s+\$' . $param->getName() . '/';
+                $found = preg_match($pattern, $method->getDocComment(), $matches);
+
+                if (!$found) {
+                    throw new \Exception("Cannot inject parameter [{$param->getName()}] and not given in arguments "
+                            . json_encode(array_keys($args)));
+                }
+
+                $arg = $this->factory->getInstance($matches[1]);
             }
             $argArray[$param->getName()] = $arg;
         }

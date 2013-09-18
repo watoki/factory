@@ -142,4 +142,26 @@ class ConstructorInjectionTest extends Specification {
         $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('date', null);
     }
 
+    public function testDocCommentTypeHints() {
+        $this->factoryFix->givenTheClassDefinition('class DocCommentHints {
+            /**
+             * @param StdClass $one
+             * @param DateTime $two
+             * @param StdClass $three
+             * @param object $four
+             */
+            function __construct($one, StdClass $two, $three = "foo", $four = "bar") {
+                $this->one = $one;
+                $this->two = $two;
+                $this->three = $three;
+                $this->four = $four;
+            }
+        }');
+        $this->factoryFix->whenIGet_FromTheFactory('DocCommentHints');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('two', 'StdClass');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('three', 'foo');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('four', 'bar');
+    }
+
 }

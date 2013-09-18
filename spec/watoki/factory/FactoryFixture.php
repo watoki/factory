@@ -109,6 +109,10 @@ class FactoryFixture extends Fixture {
         $this->spec->assertEquals($value, $this->instance->$prop);
     }
 
+    public function thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf($prop, $class) {
+        $this->spec->assertInstanceOf($class, @$this->instance->$prop);
+    }
+
     public function theTheProperty_ShouldBeAnInstanceOf($propertyName, $class) {
         $reflection = new \ReflectionProperty(get_class($this->instance), $propertyName);
         $reflection->setAccessible(true);
