@@ -73,6 +73,22 @@ class PropertyInjectionTest extends Specification {
         $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('bar', null);
     }
 
+    public function testDontInjectPropertiesWithValues() {
+        $this->factoryFix->givenTheClassDefinition('
+            class PropertyWithValue {
+                /** @var StdClass <- */
+                public $foo = "not null";
+
+                /** @var StdClass <- */
+                public $bar;
+            }
+        ');
+        $this->factoryFix->whenIGet_FromTheFactory('PropertyWithValue');
+
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('foo', 'not null');
+        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('bar', 'StdClass');
+    }
+
     /** @var PropertyInjectionProvider */
     private $provider;
 

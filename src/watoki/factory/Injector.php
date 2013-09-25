@@ -121,7 +121,10 @@ class Injector {
         if ($classReflection->hasProperty($property)) {
             $reflectionProperty = $classReflection->getProperty($property);
             $reflectionProperty->setAccessible(true);
-            $reflectionProperty->setValue($object, $this->factory->getInstance($class));
+
+            if ($reflectionProperty->getValue($object) === null) {
+                $reflectionProperty->setValue($object, $this->factory->getInstance($class));
+            }
         } else {
             $object->$property = $this->factory->getInstance($class);
         }
