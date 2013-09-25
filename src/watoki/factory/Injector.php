@@ -5,13 +5,20 @@ class Injector {
 
     const INJECTION_MARKER = '<-';
 
+    /** @var bool */
+    private $throwException = true;
+
     /**
      * @var Factory
      */
     private $factory;
 
-    function __construct(Factory $factory) {
+    public function __construct(Factory $factory) {
         $this->factory = $factory;
+    }
+
+    public function setThrowWhenCantInjectProperty($throw) {
+        $this->throwException = $throw;
     }
 
     public function injectConstructor($class, $args) {
@@ -104,7 +111,11 @@ class Injector {
         $class = $resolver->resolve($className);
 
         if (!$class) {
-            throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+            if ($this->throwException) {
+                throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+            } else {
+                return;
+            }
         }
 
         if ($classReflection->hasProperty($property)) {
