@@ -44,7 +44,7 @@ class Injector {
                 $arg = $args[$param->getPosition()];
             } else if ($param->isDefaultValueAvailable()) {
                 $arg = $param->getDefaultValue();
-            } else if ($param->getClass()) {
+            } else if ($param->getClass() && !$param->getClass()->isAbstract() && !$param->getClass()->isInterface()) {
                 $arg = $this->factory->getInstance($param->getClass()->getName());
             } else {
                 $matches = array();

@@ -1,149 +1,159 @@
 <?php
 namespace spec\watoki\factory;
 
-use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
- * @property \spec\watoki\factory\FactoryFixture factoryFix <-
+ * @property FactoryFixture $fix <-
  */
 class ConstructorInjectionTest extends Specification {
 
     public function testEmptyConstructor() {
-        $this->factoryFix->givenTheClassDefinition('class SomeClass {}');
-        $this->factoryFix->whenIGet_FromTheFactory('SomeClass');
-        $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('SomeClass');
+        $this->fix->givenTheClassDefinition('class SomeClass {}');
+        $this->fix->whenIGet_FromTheFactory('SomeClass');
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('SomeClass');
     }
 
     public function testConstructorArguments() {
-        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructor {
+        $this->fix->givenTheClassDefinition('class ClassWithConstructor {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
         }');
-        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructor', array('arg2' => ' World', 'arg1' => 'Hello'));
+        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructor', array('arg2' => ' World', 'arg1' => 'Hello'));
 
-        $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('ClassWithConstructor');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('ClassWithConstructor');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
     public function testConstructorArgumentsInList() {
-        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructorInList {
+        $this->fix->givenTheClassDefinition('class ClassWithConstructorInList {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
         }');
 
-        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorInList', array('Hello', ' You'));
+        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorInList', array('Hello', ' You'));
 
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello You');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello You');
     }
 
     public function testConstructorArgumentsMixed() {
-        $this->factoryFix->givenTheClassDefinition('class ClassWithConstructorMixed {
+        $this->fix->givenTheClassDefinition('class ClassWithConstructorMixed {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
         }');
 
-        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorMixed', array('arg2' => ' World', 0 => 'Hello'));
+        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorMixed', array('arg2' => ' World', 0 => 'Hello'));
 
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
     public function testDefaultArguments() {
-        $this->factoryFix->givenTheClassDefinition('class DefaultArguments {
+        $this->fix->givenTheClassDefinition('class DefaultArguments {
             function __construct($argRequired, $argDefault = " World") {
                 $this->msg = $argRequired . $argDefault;
             }
         }');
-        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('DefaultArguments', array('argRequired' => 'Hello'));
-        $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('DefaultArguments');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+        $this->fix->whenIGet_WithArguments_FromTheFactory('DefaultArguments', array('argRequired' => 'Hello'));
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('DefaultArguments');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+    }
+
+    public function testDontInjectDefaultArgument() {
+        $this->fix->givenTheClassDefinition('class DontInjectDefaultArgument {
+            function __construct(StdClass $dont = null) {
+                $this->dont = $dont;
+            }
+        }');
+        $this->fix->whenIGet_FromTheFactory('DontInjectDefaultArgument');
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('DontInjectDefaultArgument');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('dont', null);
     }
 
     public function testMissingArguments() {
-        $this->factoryFix->givenTheClassDefinition('class MissingArgument {
+        $this->fix->givenTheClassDefinition('class MissingArgument {
             function __construct($arg1, $arg2) {
                 $this->msg = $arg1 . $arg2;
             }
         }');
-        $this->factoryFix->whenITryToGet_WithArguments_FromTheFactory('MissingArgument', array('arg2' => 'Not enough'));
-        $this->factoryFix->thenAnExceptionShouldBeThrown();
+        $this->fix->whenITryToGet_WithArguments_FromTheFactory('MissingArgument', array('arg2' => 'Not enough'));
+        $this->fix->thenAnExceptionShouldBeThrown();
     }
 
     public function testInjectArgumentsByFactory() {
-        $this->factoryFix->givenTheClassDefinition('class InjectMe {
+        $this->fix->givenTheClassDefinition('class InjectMe {
             function __construct($msg = "Hello World") {
                 $this->greeting = $msg;
             }
         }');
-        $this->factoryFix->givenTheClassDefinition('class InjectingOne {
+        $this->fix->givenTheClassDefinition('class InjectingOne {
             function __construct(InjectMe $arg1) {
                 $this->msg = $arg1->greeting;
             }
         }');
-        $this->factoryFix->whenIGet_FromTheFactory('InjectingOne');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+        $this->fix->whenIGet_FromTheFactory('InjectingOne');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
     public function testMixGivenAndInjectedArguments() {
-        $this->factoryFix->givenTheClassDefinition('class InjectMeToo {
+        $this->fix->givenTheClassDefinition('class InjectMeToo {
             function __construct($msg = "Hello") {
                 $this->greeting = $msg;
             }
         }');
-        $this->factoryFix->givenTheClassDefinition('class InjectingTwo {
+        $this->fix->givenTheClassDefinition('class InjectingTwo {
             function __construct(InjectMeToo $arg1, $arg2, $arg3 = "!") {
                 $this->msg = $arg1->greeting . $arg2 . $arg3;
             }
         }');
-        $this->factoryFix->whenIGet_WithArguments_FromTheFactory('InjectingTwo', array('arg2' => ' World'));
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World!');
+        $this->fix->whenIGet_WithArguments_FromTheFactory('InjectingTwo', array('arg2' => ' World'));
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World!');
     }
 
     public function testInjectFactory() {
-        $this->factoryFix->givenTheClassDefinition('class InjectFactory {
+        $this->fix->givenTheClassDefinition('class InjectFactory {
             function __construct(\watoki\factory\Factory $factory) {
                 $this->factory = $factory;
             }
         }');
-        $this->factoryFix->whenIGet_FromTheFactory('InjectFactory');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeTheFactory('factory');
+        $this->fix->whenIGet_FromTheFactory('InjectFactory');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeTheFactory('factory');
     }
 
     public function testRecursiveInjection() {
-        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionOne {
+        $this->fix->givenTheClassDefinition('class RecursiveInjectionOne {
             function __construct($msg = "Hello") {
                 $this->msg = $msg;
             }
         }');
-        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionTwo {
+        $this->fix->givenTheClassDefinition('class RecursiveInjectionTwo {
             function __construct(RecursiveInjectionOne $one, $msg = " World") {
                 $this->msg = $one->msg . $msg;
             }
         }');
-        $this->factoryFix->givenTheClassDefinition('class RecursiveInjectionThree {
+        $this->fix->givenTheClassDefinition('class RecursiveInjectionThree {
             function __construct(RecursiveInjectionTwo $two) {
                 $this->msg = $two->msg;
             }
         }');
-        $this->factoryFix->whenIGet_FromTheFactory('RecursiveInjectionThree');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+        $this->fix->whenIGet_FromTheFactory('RecursiveInjectionThree');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
     public function testOptionalClassArgument() {
-        $this->factoryFix->givenTheClassDefinition('class OptionalClassArgument {
+        $this->fix->givenTheClassDefinition('class OptionalClassArgument {
             function __construct(\DateTime $date = null) {
                 $this->date = $date;
             }
         }');
-        $this->factoryFix->whenIGet_FromTheFactory('OptionalClassArgument');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('date', null);
+        $this->fix->whenIGet_FromTheFactory('OptionalClassArgument');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('date', null);
     }
 
     public function testDocCommentTypeHints() {
-        $this->factoryFix->givenTheClassDefinition('class DocCommentHints {
+        $this->fix->givenTheClassDefinition('class DocCommentHints {
             /**
              * @param StdClass $one
              * @param DateTime $two
@@ -157,11 +167,29 @@ class ConstructorInjectionTest extends Specification {
                 $this->four = $four;
             }
         }');
-        $this->factoryFix->whenIGet_FromTheFactory('DocCommentHints');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('two', 'StdClass');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('three', 'foo');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('four', 'bar');
+        $this->fix->whenIGet_FromTheFactory('DocCommentHints');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('two', 'StdClass');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('three', 'foo');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('four', 'bar');
+    }
+
+    public function testAbstractDependency() {
+        $this->fix->givenTheClassDefinition('abstract class AbstractDependency {}');
+        $this->fix->givenTheClassDefinition('class HasAbstractDependency {
+            function __construct(AbstractDependency $itsAbstract) {}
+        }');
+        $this->fix->whenITryToGet_FromTheFactory('HasAbstractDependency');
+        $this->fix->thenAnExceptionShouldBeThrown();
+    }
+
+    public function testInterfaceDependency() {
+        $this->fix->givenTheClassDefinition('interface InterfaceDependency {}');
+        $this->fix->givenTheClassDefinition('class HasInterfaceDependency {
+            function __construct(InterfaceDependency $itsAbstract) {}
+        }');
+        $this->fix->whenITryToGet_FromTheFactory('HasInterfaceDependency');
+        $this->fix->thenAnExceptionShouldBeThrown();
     }
 
 }

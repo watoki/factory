@@ -76,6 +76,14 @@ class FactoryFixture extends Fixture {
         }
     }
 
+    public function whenITryToGet_FromTheFactory($className) {
+        try {
+            $this->whenIGet_FromTheFactory($className);
+        } catch (\Exception $e) {
+            $this->caught = $e;
+        }
+    }
+
     public function whenITryToGetTheSingleton($className) {
         try {
             $this->whenIGetTheSingleton($className);
