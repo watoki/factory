@@ -174,6 +174,22 @@ class ConstructorInjectionTest extends Specification {
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('four', 'bar');
     }
 
+    public function testRelativeTypeHints() {
+        $this->fix->givenTheClassDefinition('namespace one\two; class RelativeDependency {}');
+        $this->fix->givenTheClassDefinition('
+        namespace one;
+        class RelativeTypeHints {
+            /**
+             * @param two\RelativeDependency $one
+             */
+            function __construct($one) {
+                $this->one = $one;
+            }
+        }');
+        $this->fix->whenIGet_FromTheFactory('one\RelativeTypeHints');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'one\two\RelativeDependency');
+    }
+
     public function testAbstractDependency() {
         $this->fix->givenTheClassDefinition('abstract class AbstractDependency {}');
         $this->fix->givenTheClassDefinition('class HasAbstractDependency {

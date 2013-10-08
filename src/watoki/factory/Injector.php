@@ -24,6 +24,10 @@ class Injector {
     public function injectConstructor($class, $args) {
         $reflection = new \ReflectionClass($class);
 
+        if ($reflection->isAbstract() || $reflection->isInterface()) {
+            throw new \Exception("Cannot instantiate abstract class [$class].");
+        }
+
         if (!$reflection->getConstructor()) {
             return $reflection->newInstance();
         }
@@ -36,6 +40,7 @@ class Injector {
     }
 
     public function injectMethodArguments(\ReflectionMethod $method, array $args) {
+        $resolver = null;
         $argArray = array();
         foreach ($method->getParameters() as $param) {
             if (array_key_exists($param->getName(), $args)) {
@@ -44,7 +49,7 @@ class Injector {
                 $arg = $args[$param->getPosition()];
             } else if ($param->isDefaultValueAvailable()) {
                 $arg = $param->getDefaultValue();
-            } else if ($param->getClass() && !$param->getClass()->isAbstract() && !$param->getClass()->isInterface()) {
+            } else if ($param->getClass()) {
                 $arg = $this->factory->getInstance($param->getClass()->getName());
             } else {
                 $matches = array();
@@ -56,7 +61,10 @@ class Injector {
                             . json_encode(array_keys($args)));
                 }
 
-                $arg = $this->factory->getInstance($matches[1]);
+                if (!isset($resolver)) {
+                    $resolver = new ClassResolver($method->getDeclaringClass());
+                }
+                $arg = $this->factory->getInstance($resolver->resolve($matches[1]));
             }
             $argArray[$param->getName()] = $arg;
         }
