@@ -5,7 +5,7 @@ use watoki\factory\providers\PropertyInjectionProvider;
 use watoki\scrut\Specification;
 
 /**
- * @property FactoryFixture $factoryFix <-
+ * @property FactoryFixture $fix <-
  */
 class PropertyInjectionTest extends Specification {
 
@@ -14,7 +14,7 @@ class PropertyInjectionTest extends Specification {
     }
 
     public function testInjectPublicProperty() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class PublicProperty {
                 /**
                  * @var StdClass <-
@@ -28,14 +28,14 @@ class PropertyInjectionTest extends Specification {
             }
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('PublicProperty');
+        $this->fix->whenIGet_FromTheFactory('PublicProperty');
 
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('bar', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('bar', 'StdClass');
     }
 
     public function testProtectedAndPrivateProperties() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class ProtectedAndPrivateProperty {
                 /**
                  * @var StdClass <-
@@ -44,14 +44,14 @@ class PropertyInjectionTest extends Specification {
             }
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('ProtectedAndPrivateProperty');
+        $this->fix->whenIGet_FromTheFactory('ProtectedAndPrivateProperty');
 
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
     }
 
     public function testAnnotationInsteadOfMarker() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class AnnotatedProperty {
                 /**
                  * @inject
@@ -67,14 +67,14 @@ class PropertyInjectionTest extends Specification {
         ');
         $this->givenOnlyPropertiesWithTheAnnotation_ShouldBeInjected('@inject');
 
-        $this->factoryFix->whenIGet_FromTheFactory('AnnotatedProperty');
+        $this->fix->whenIGet_FromTheFactory('AnnotatedProperty');
 
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('bar', null);
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('bar', null);
     }
 
     public function testDontInjectPropertiesWithValues() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class PropertyWithValue {
                 /** @var StdClass <- */
                 public $foo = "not null";
@@ -83,18 +83,28 @@ class PropertyInjectionTest extends Specification {
                 public $bar;
             }
         ');
-        $this->factoryFix->whenIGet_FromTheFactory('PropertyWithValue');
+        $this->fix->whenIGet_FromTheFactory('PropertyWithValue');
 
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('foo', 'not null');
-        $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('bar', 'StdClass');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('foo', 'not null');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('bar', 'StdClass');
+    }
+
+    public function testMethodInjection() {
+        $this->fix->givenTheClassDefinition('class MethodInjection {
+            public function inject(StdClass $one) {
+                $this->one = $one;
+            }
+        }');
+        $this->fix->whenIGet_FromTheFactory('MethodInjection');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
     }
 
     /** @var PropertyInjectionProvider */
     private $provider;
 
     private function givenPropertyInjectionProviderIsTheDefaultProvider() {
-        $this->provider = new PropertyInjectionProvider($this->factoryFix->factory);
-        $this->factoryFix->factory->setProvider('stdClass', $this->provider);
+        $this->provider = new PropertyInjectionProvider($this->fix->factory);
+        $this->fix->factory->setProvider('stdClass', $this->provider);
     }
 
     private function givenOnlyPropertiesWithTheAnnotation_ShouldBeInjected($annotation) {

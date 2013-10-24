@@ -39,6 +39,13 @@ class Injector {
         }
     }
 
+    public function injectMethod($object, $method, $args = array()) {
+        $reflection = new \ReflectionMethod($object, $method);
+        $args = $this->injectMethodArguments($reflection, $args);
+
+        return $reflection->invokeArgs($object, $args);
+    }
+
     public function injectMethodArguments(\ReflectionMethod $method, array $args) {
         $resolver = null;
         $argArray = array();
