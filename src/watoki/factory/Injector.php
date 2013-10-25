@@ -64,8 +64,8 @@ class Injector {
                 $found = preg_match($pattern, $method->getDocComment(), $matches);
 
                 if (!$found) {
-                    throw new \Exception("Cannot inject parameter [{$param->getName()}] and not given in arguments "
-                            . json_encode(array_keys($args)));
+                    throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}::{$method->getName()}] and not given in arguments "
+                        . json_encode(array_keys($args)));
                 }
 
                 if (!isset($resolver)) {
