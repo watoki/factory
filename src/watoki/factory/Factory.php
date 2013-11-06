@@ -55,8 +55,14 @@ class Factory {
         return $this->singletons[$normalized];
     }
 
+    /**
+     * @param string $class
+     * @param object $instance
+     * @return object The instance
+     */
     public function setSingleton($class, $instance) {
-        return $this->singletons[$this->normalizeClass($class)] = $instance;
+        $this->singletons[$this->normalizeClass($class)] = $instance;
+        return $instance;
     }
 
     public function setProvider($class, Provider $provider) {
