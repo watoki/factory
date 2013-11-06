@@ -140,6 +140,26 @@ class PropertyAnnotationInjectionTest extends Specification {
         $this->factoryFix->thenTheLoadedDependency_ShouldBe(2, 'Second');
     }
 
+    public function testCreateMembers() {
+        $this->factoryFix->givenTheClassDefinition('
+            /**
+             * @property StdClass foo <-
+             */
+            class BaseAnnotationClass {}
+        ');
+        $this->factoryFix->givenTheClassDefinition('
+            /**
+             * @property StdClass bar <-
+             */
+            class ChildAnnotationClass extends BaseAnnotationClass {}
+        ');
+
+        $this->factoryFix->whenIGet_FromTheFactory('ChildAnnotationClass');
+
+        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('bar', 'StdClass');
+        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
+    }
+
     private function givenPropertyInjectionProviderIsTheDefaultProviderWithAnnotationsEnabled() {
         $this->factoryFix->factory->setProvider('stdClass', new PropertyInjectionProvider($this->factoryFix->factory, true));
     }

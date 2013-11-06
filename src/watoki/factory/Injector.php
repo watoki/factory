@@ -85,18 +85,23 @@ class Injector {
      * @throws \Exception
      */
     public function injectPropertyAnnotations($object, $filter, \ReflectionClass $context = null) {
-        $classReflection = $context ?: new \ReflectionClass($object);
-        $resolver = new ClassResolver($classReflection);
+        $classReflection = $context ? : new \ReflectionClass($object);
 
-        $matches = array();
-        preg_match_all('/@property\s+(\S+)\s+\$?(\S+).*/', $classReflection->getDocComment(), $matches);
+        while ($classReflection) {
+            $resolver = new ClassResolver($classReflection);
 
-        foreach ($matches[0] as $i => $match) {
-            if (!$filter(trim($match))) {
-                continue;
+            $matches = array();
+            preg_match_all('/@property\s+(\S+)\s+\$?(\S+).*/', $classReflection->getDocComment(), $matches);
+
+            foreach ($matches[0] as $i => $match) {
+                if (!$filter(trim($match))) {
+                    continue;
+                }
+
+                $this->injectProperty($matches[2][$i], $object, $resolver, $matches[1][$i], $classReflection);
             }
 
-            $this->injectProperty($matches[2][$i], $object, $resolver, $matches[1][$i], $classReflection);
+            $classReflection = $classReflection->getParentClass();
         }
     }
 
