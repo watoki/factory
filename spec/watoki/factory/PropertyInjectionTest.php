@@ -89,6 +89,16 @@ class PropertyInjectionTest extends Specification {
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('bar', 'StdClass');
     }
 
+    public function testMethodInjection() {
+        $this->fix->givenTheClassDefinition('class MethodInjection {
+            public function inject(StdClass $one) {
+                $this->one = $one;
+            }
+        }');
+        $this->fix->whenIGet_FromTheFactory('MethodInjection');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
+    }
+
     /** @var PropertyInjectionProvider */
     private $provider;
 
