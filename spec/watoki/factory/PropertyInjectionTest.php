@@ -1,17 +1,13 @@
 <?php
 namespace spec\watoki\factory;
 
-use watoki\factory\providers\PropertyInjectionProvider;
+use watoki\factory\providers\DefaultProvider;
 use watoki\scrut\Specification;
 
 /**
  * @property FactoryFixture $fix <-
  */
 class PropertyInjectionTest extends Specification {
-
-    protected function background() {
-        $this->givenPropertyInjectionProviderIsTheDefaultProvider();
-    }
 
     public function testInjectPublicProperty() {
         $this->fix->givenTheClassDefinition('
@@ -99,15 +95,12 @@ class PropertyInjectionTest extends Specification {
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
     }
 
-    /** @var PropertyInjectionProvider */
+    /** @var DefaultProvider */
     private $provider;
 
-    private function givenPropertyInjectionProviderIsTheDefaultProvider() {
-        $this->provider = new PropertyInjectionProvider($this->fix->factory);
-        $this->fix->factory->setProvider('stdClass', $this->provider);
-    }
-
     private function givenOnlyPropertiesWithTheAnnotation_ShouldBeInjected($annotation) {
+        $this->provider = new DefaultProvider($this->fix->factory);
+        $this->fix->factory->setProvider('StdClass', $this->provider);
         $this->provider->setPropertyFilter(function (\ReflectionProperty $property) use ($annotation) {
             return strpos($property->getDocComment(), $annotation) !== false;
         });

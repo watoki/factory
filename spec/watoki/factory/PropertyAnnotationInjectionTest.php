@@ -1,17 +1,12 @@
 <?php
 namespace spec\watoki\factory;
 
-use watoki\factory\providers\PropertyInjectionProvider;
 use watoki\scrut\Specification;
 
 /**
  * @property FactoryFixture $factoryFix <-
  */
 class PropertyAnnotationInjectionTest extends Specification {
-
-    protected function background() {
-        $this->givenPropertyInjectionProviderIsTheDefaultProviderWithAnnotationsEnabled();
-    }
 
     public function testFullyQualifiedClassNames() {
         $this->factoryFix->givenTheClass_InTheNamespace('FullNameDependency', 'some\name\space');
@@ -158,9 +153,5 @@ class PropertyAnnotationInjectionTest extends Specification {
 
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('bar', 'StdClass');
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
-    }
-
-    private function givenPropertyInjectionProviderIsTheDefaultProviderWithAnnotationsEnabled() {
-        $this->factoryFix->factory->setProvider('stdClass', new PropertyInjectionProvider($this->factoryFix->factory, true));
     }
 }
