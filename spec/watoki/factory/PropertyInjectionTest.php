@@ -95,6 +95,17 @@ class PropertyInjectionTest extends Specification {
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
     }
 
+    public function testInParentAliasedTypeHint() {
+        $this->fix->givenTheClassDefinition('namespace here; class MyAliasedClass {}');
+        $this->fix->givenTheClassDefinition('use here\MyAliasedClass; class AliasingParent {
+            /** @var MyAliasedClass <- */
+            public $foo;
+        }');
+        $this->fix->givenTheClassDefinition('class AliasingSubClass extends AliasingParent {}');
+        $this->fix->whenIGet_FromTheFactory('AliasingSubClass');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('foo', 'here\MyAliasedClass');
+    }
+
     /** @var DefaultProvider */
     private $provider;
 

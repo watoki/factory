@@ -33,7 +33,7 @@ class ClassResolver {
     }
 
     private function findAliasedClass($class) {
-        $stmts = $this->parse($class);
+        $stmts = $this->parse();
 
         foreach ($stmts as $stmt) {
             if ($stmt instanceof \PHPParser_Node_Stmt_Namespace) {
@@ -55,14 +55,14 @@ class ClassResolver {
         return null;
     }
 
-    private function parse($class) {
+    private function parse() {
         $contextName = $this->context->getName();
         if (!array_key_exists($contextName, self::$cache)) {
             try {
                 $parser = new \PHPParser_Parser(new \PHPParser_Lexer());
                 self::$cache[$contextName] = $parser->parse(file_get_contents($this->context->getFileName()));
             } catch (\PHPParser_Error $e) {
-                throw new \Exception("Error while parsing [$class]: " . $e->getMessage());
+                throw new \Exception("Error while parsing [{$this->context->getName()}]: " . $e->getMessage());
             }
         }
 

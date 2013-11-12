@@ -8,9 +8,7 @@ class Injector {
     /** @var bool */
     private $throwException = true;
 
-    /**
-     * @var Factory
-     */
+    /** @var Factory <- */
     private $factory;
 
     public function __construct(Factory $factory) {
@@ -46,36 +44,69 @@ class Injector {
         return $reflection->invokeArgs($object, $args);
     }
 
-    public function injectMethodArguments(\ReflectionMethod $method, array $args) {
-        $resolver = null;
+    public function injectMethodArguments(\ReflectionMethod $method, array $args, FilterFactory $filters = null) {
         $argArray = array();
         foreach ($method->getParameters() as $param) {
-            if (array_key_exists($param->getName(), $args)) {
-                $arg = $args[$param->getName()];
-            } else if (array_key_exists($param->getPosition(), $args)) {
-                $arg = $args[$param->getPosition()];
+            $type = $this->findTypeHint($method, $param);
+
+            if ($this->hasValue($param, $args)) {
+                $value = $this->getValue($param, $args);
+                if ($type && $filters) {
+                    $arg = $filters->getFilter($type)->filter($value);
+                } else {
+                    $arg = $value;
+                }
             } else if ($param->isDefaultValueAvailable()) {
                 $arg = $param->getDefaultValue();
-            } else if ($param->getClass()) {
-                $arg = $this->factory->getInstance($param->getClass()->getName());
+            } else if (!$type) {
+                throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}"
+                    . "::{$method->getName()}]: Argument not given and no type hint found.");
             } else {
-                $matches = array();
-                $pattern = '/@param\s+(\S+)\s+\$' . $param->getName() . '/';
-                $found = preg_match($pattern, $method->getDocComment(), $matches);
-
-                if (!$found) {
-                    throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}::{$method->getName()}] and not given in arguments "
-                        . json_encode(array_keys($args)));
+                try {
+                    $arg = $this->factory->getInstance($type);
+                } catch (\Exception $e) {
+                    throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}"
+                        . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
                 }
-
-                if (!isset($resolver)) {
-                    $resolver = new ClassResolver($method->getDeclaringClass());
-                }
-                $arg = $this->factory->getInstance($resolver->resolve($matches[1]));
             }
+
             $argArray[$param->getName()] = $arg;
         }
         return $argArray;
+    }
+
+    private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
+        if ($param->getClass()) {
+            return $param->getClass()->getName();
+        }
+
+        $matches = array();
+        $pattern = '/@param\s+(\S+)\s+\$' . $param->getName() . '/';
+        $found = preg_match($pattern, $method->getDocComment(), $matches);
+
+        if (!$found) {
+            return null;
+        }
+        $type = $matches[1];
+
+        $resolver = new ClassResolver($method->getDeclaringClass());
+        $resolved = $resolver->resolve($type);
+
+        return $resolved ?: $type;
+    }
+
+    private function getValue(\ReflectionParameter $param, array $args) {
+        if (array_key_exists($param->getName(), $args)) {
+            return $args[$param->getName()];
+        } else if (array_key_exists($param->getPosition(), $args)) {
+            return $args[$param->getPosition()];
+        } else {
+            return null;
+        }
+    }
+
+    private function hasValue(\ReflectionParameter $param, array $args) {
+        return array_key_exists($param->getName(), $args) || array_key_exists($param->getPosition(), $args);
     }
 
     /**
@@ -98,7 +129,7 @@ class Injector {
                     continue;
                 }
 
-                $this->injectProperty($matches[2][$i], $object, $resolver, $matches[1][$i], $classReflection);
+                $this->injectProperty($object, $matches[2][$i], $resolver->resolve($matches[1][$i]));
             }
 
             $classReflection = $classReflection->getParentClass();
@@ -113,7 +144,6 @@ class Injector {
      */
     public function injectProperties($object, $filter, \ReflectionClass $context = null) {
         $classReflection = $context ?: new \ReflectionClass($object);
-        $resolver = new ClassResolver($classReflection);
 
         foreach ($classReflection->getProperties() as $property) {
             $matches = array();
@@ -123,30 +153,33 @@ class Injector {
                 continue;
             }
 
-            $this->injectProperty($property->getName(), $object, $resolver, $matches[1], $classReflection);
+            $resolver = new ClassResolver($property->getDeclaringClass());
+            $this->injectProperty($object, $property->getName(), $resolver->resolve($matches[1]));
         }
     }
 
-    private function injectProperty($property, $object, ClassResolver $resolver, $className, \ReflectionClass $classReflection) {
-        $class = $resolver->resolve($className);
+    private function injectProperty($targetObject, $propertyName, $type) {
+        $classReflection = new \ReflectionClass($targetObject);
 
-        if (!$class) {
+        if (!$type) {
             if ($this->throwException) {
-                throw new \Exception("Error while loading dependency [$property] of [{$classReflection->getShortName()}]: Could not find class [$className].");
+                throw new \Exception("Error while loading dependency [$propertyName] of [{$classReflection->getShortName()}]: "
+                    . "Could not find [$type].");
             } else {
                 return;
             }
         }
 
-        if ($classReflection->hasProperty($property)) {
-            $reflectionProperty = $classReflection->getProperty($property);
+        if ($classReflection->hasProperty($propertyName)) {
+            $reflectionProperty = $classReflection->getProperty($propertyName);
             $reflectionProperty->setAccessible(true);
 
-            if ($reflectionProperty->getValue($object) === null) {
-                $reflectionProperty->setValue($object, $this->factory->getInstance($class));
+            if ($reflectionProperty->getValue($targetObject) === null) {
+                $reflectionProperty->setValue($targetObject, $this->factory->getInstance($type));
             }
         } else {
-            $object->$property = $this->factory->getInstance($class);
+            $targetObject->$propertyName = $this->factory->getInstance($type);
         }
+
     }
 }
