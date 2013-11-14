@@ -56,6 +56,10 @@ class ClassResolver {
     }
 
     private function parse() {
+        if (!file_exists($this->context->getFileName())) {
+            return array();
+        }
+
         $contextName = $this->context->getName();
         if (!array_key_exists($contextName, self::$cache)) {
             try {
