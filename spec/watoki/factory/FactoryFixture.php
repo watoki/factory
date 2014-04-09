@@ -122,9 +122,7 @@ class FactoryFixture extends Fixture {
     }
 
     public function theTheProperty_ShouldBeAnInstanceOf($propertyName, $class) {
-        $reflection = new \ReflectionProperty(get_class($this->instance), $propertyName);
-        $reflection->setAccessible(true);
-        $this->spec->assertInstanceOf($class, $reflection->getValue($this->instance));
+        $this->spec->assertInstanceOf($class, $this->getPropertyValue($propertyName));
     }
 
     public function thenTheShouldBeNoProperty($propertyName) {
@@ -141,6 +139,19 @@ class FactoryFixture extends Fixture {
 
     public function thenTheTheProperty_OfTheObjectShouldBeTheFactory($prop) {
         $this->spec->assertTrue($this->factory === $this->instance->$prop);
+    }
+
+    private function getPropertyValue($propertyName) {
+        $classReflection = new \ReflectionClass($this->instance);
+        while ($classReflection) {
+            if ($classReflection->hasProperty($propertyName)) {
+                $property = $classReflection->getProperty($propertyName);
+                $property->setAccessible(true);
+                return $property->getValue($this->instance);
+            };
+            $classReflection = $classReflection->getParentClass();
+        }
+        return null;
     }
 
 }

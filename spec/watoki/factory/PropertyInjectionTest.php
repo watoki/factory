@@ -15,6 +15,21 @@ class PropertyInjectionTest extends Specification {
                 /**
                  * @var StdClass <-
                  */
+                public $foo;
+            }
+        ');
+
+        $this->fix->whenIGet_FromTheFactory('PublicProperty');
+
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+    }
+
+    public function testProtectedAndPrivateProperties() {
+        $this->fix->givenTheClassDefinition('
+            class ProtectedAndPrivateProperty {
+                /**
+                 * @var StdClass <-
+                 */
                 protected $foo;
 
                 /**
@@ -24,25 +39,30 @@ class PropertyInjectionTest extends Specification {
             }
         ');
 
-        $this->fix->whenIGet_FromTheFactory('PublicProperty');
+        $this->fix->whenIGet_FromTheFactory('ProtectedAndPrivateProperty');
 
         $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
         $this->fix->theTheProperty_ShouldBeAnInstanceOf('bar', 'StdClass');
     }
 
-    public function testProtectedAndPrivateProperties() {
+    public function testInjectPrivatePropertyFromBaseClass() {
         $this->fix->givenTheClassDefinition('
-            class ProtectedAndPrivateProperty {
+            class PrivatePropertyBase {
                 /**
                  * @var StdClass <-
                  */
-                public $foo;
+                private $foo;
             }
         ');
 
-        $this->fix->whenIGet_FromTheFactory('ProtectedAndPrivateProperty');
+        $this->fix->givenTheClassDefinition('
+            class InheritsPrivateProperty extends PrivatePropertyBase {
 
-        $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
+            }
+        ');
+
+        $this->fix->whenIGet_FromTheFactory('InheritsPrivateProperty');
+
         $this->fix->theTheProperty_ShouldBeAnInstanceOf('foo', 'StdClass');
     }
 

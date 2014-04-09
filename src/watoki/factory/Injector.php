@@ -129,7 +129,7 @@ class Injector {
                     continue;
                 }
 
-                $this->injectProperty($object, $matches[2][$i], $resolver->resolve($matches[1][$i]));
+                $this->injectProperty($object, $matches[2][$i], $resolver->resolve($matches[1][$i]), $classReflection);
             }
 
             $classReflection = $classReflection->getParentClass();
@@ -145,21 +145,25 @@ class Injector {
     public function injectProperties($object, $filter, \ReflectionClass $context = null) {
         $classReflection = $context ?: new \ReflectionClass($object);
 
-        foreach ($classReflection->getProperties() as $property) {
-            $matches = array();
-            preg_match('/@var\s+(\S+).*/', $property->getDocComment(), $matches);
+        while ($classReflection) {
+            foreach ($classReflection->getProperties() as $property) {
+                $matches = array();
+                preg_match('/@var\s+(\S+).*/', $property->getDocComment(), $matches);
 
-            if (empty($matches) || !$filter($property)) {
-                continue;
+                if (empty($matches) || !$filter($property)) {
+                    continue;
+                }
+
+                $resolver = new ClassResolver($property->getDeclaringClass());
+                $this->injectProperty($object, $property->getName(), $resolver->resolve($matches[1]), $classReflection);
             }
 
-            $resolver = new ClassResolver($property->getDeclaringClass());
-            $this->injectProperty($object, $property->getName(), $resolver->resolve($matches[1]));
+            $classReflection = $classReflection->getParentClass();
         }
     }
 
-    private function injectProperty($targetObject, $propertyName, $type) {
-        $classReflection = new \ReflectionClass($targetObject);
+    private function injectProperty($targetObject, $propertyName, $type, \ReflectionClass $context = null) {
+        $classReflection = $context ?: new \ReflectionClass($targetObject);
 
         if (!$type) {
             if ($this->throwException) {
