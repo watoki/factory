@@ -154,4 +154,19 @@ class PropertyAnnotationInjectionTest extends Specification {
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('bar', 'StdClass');
         $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
     }
+
+    public function testInheritPropertyAnnotation() {
+        $this->factoryFix->givenTheClass_InTheNamespace('BaseClassDependency', 'some\name\space');
+        $this->factoryFix->givenTheClass_WithTheDocComment('BaseWithInjectedProperty', '
+            /**
+             * @property some\name\space\BaseClassDependency foo <-
+             */
+        ');
+        $this->factoryFix->givenTheClassDefinition('
+            class InheritsProperty extends BaseWithInjectedProperty {}
+        ');
+
+        $this->factoryFix->whenIGet_FromTheFactory('InheritsProperty');
+        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\BaseClassDependency');
+    }
 }
