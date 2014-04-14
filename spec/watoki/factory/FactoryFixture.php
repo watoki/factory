@@ -7,6 +7,7 @@ use watoki\scrut\Specification;
 
 class FactoryFixture extends Fixture {
 
+    /** @var \Exception|null */
     public $caught;
 
     public $instance;
@@ -141,6 +142,10 @@ class FactoryFixture extends Fixture {
 
     public function thenTheTheProperty_OfTheObjectShouldBeTheFactory($prop) {
         $this->spec->assertTrue($this->factory === $this->instance->$prop);
+    }
+
+    public function thenAnExceptionMessageShouldContain($string) {
+        $this->spec->assertContains($string, $this->caught->getMessage());
     }
 
 }
