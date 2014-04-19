@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "nikic/php-parser": "0.9.4",
+        "nikic/php-parser": "1.*",
         "php": ">=5.3.8"
     },
     "require-dev": {
