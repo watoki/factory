@@ -73,7 +73,7 @@ class Factory {
         $isHHVM = defined('HHVM_VERSION');
 
         // fix for a hhvm issue, see https://github.com/facebook/hhvm/issues/2097
-        $parentClasses = $isHHVM ? class_parents($class) : [];
+        $parentClasses = $isHHVM ? class_parents($class) : array();
 
         while ($class) {
             $normalized = $this->normalizeClass($class);
