@@ -5,6 +5,8 @@ use watoki\factory\Factory;
 
 class DefaultProvider extends MinimalProvider {
 
+    const INJECTION_TOKEN = '<-';
+
     private $propertyFilter;
 
     private $annotationFilter;
@@ -14,12 +16,12 @@ class DefaultProvider extends MinimalProvider {
     function __construct(Factory $factory) {
         parent::__construct($factory);
 
-
         $this->annotationFilter = function ($annotation) {
-            return strpos($annotation, '<-') !== false;
+            return strpos($annotation, DefaultProvider::INJECTION_TOKEN) !== false;
         };
+
         $this->propertyFilter = function (\ReflectionProperty $property) {
-            return strpos($property->getDocComment(), '<-') !== false;
+            return strpos($property->getDocComment(), DefaultProvider::INJECTION_TOKEN) !== false;
         };
     }
 
@@ -30,9 +32,9 @@ class DefaultProvider extends MinimalProvider {
             $this->injector->injectMethod($instance, $this->injectionMethod);
         }
 
-        $this->injector->injectProperties($instance, $this->propertyFilter);
+        $this->injector->injectProperties($instance, $this->getPropertyFilter());
 
-        $this->injector->injectPropertyAnnotations($instance, $this->annotationFilter);
+        $this->injector->injectPropertyAnnotations($instance, $this->getAnnotationFilter());
 
         return $instance;
     }
