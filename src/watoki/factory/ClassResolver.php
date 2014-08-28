@@ -1,6 +1,13 @@
 <?php
 namespace watoki\factory;
  
+use PhpParser\Error;
+use PhpParser\Lexer;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\Stmt\UseUse;
+use PhpParser\Parser;
+
 class ClassResolver {
 
     static private $cache = array();
@@ -36,16 +43,16 @@ class ClassResolver {
         $stmts = $this->parse();
 
         foreach ($stmts as $stmt) {
-            if ($stmt instanceof \PHPParser_Node_Stmt_Namespace) {
+            if ($stmt instanceof Namespace_) {
                 $stmts = $stmt->stmts;
                 break;
             }
         }
 
         foreach ($stmts as $stmt) {
-            if ($stmt instanceof \PHPParser_Node_Stmt_Use) {
+            if ($stmt instanceof Use_) {
                 foreach ($stmt->uses as $use) {
-                    if ($use instanceof \PHPParser_Node_Stmt_UseUse && $use->alias == $class) {
+                    if ($use instanceof UseUse && $use->alias == $class) {
                         return $use->name->toString();
                     }
                 }
@@ -63,9 +70,9 @@ class ClassResolver {
         $contextName = $this->context->getName();
         if (!array_key_exists($contextName, self::$cache)) {
             try {
-                $parser = new \PHPParser_Parser(new \PHPParser_Lexer());
+                $parser = new Parser(new Lexer());
                 self::$cache[$contextName] = $parser->parse(file_get_contents($this->context->getFileName()));
-            } catch (\PHPParser_Error $e) {
+            } catch (Error $e) {
                 throw new \Exception("Error while parsing [{$this->context->getName()}]: " . $e->getMessage());
             }
         }

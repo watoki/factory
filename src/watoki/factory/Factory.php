@@ -70,6 +70,11 @@ class Factory {
     }
 
     private function findMatchingProvider($class) {
+        $isHHVM = defined('HHVM_VERSION');
+
+        // fix for a hhvm issue, see https://github.com/facebook/hhvm/issues/2097
+        $parentClasses = $isHHVM ? class_parents($class) : array();
+
         while ($class) {
             $normalized = $this->normalizeClass($class);
             foreach ($this->providers as $key => $provider) {
@@ -77,7 +82,7 @@ class Factory {
                     return $provider;
                 }
             }
-            $class = get_parent_class($class);
+            $class = $isHHVM ? array_shift($parentClasses) : get_parent_class($class);
         }
         return $this->providers['stdclass'];
     }
