@@ -125,7 +125,7 @@ class Injector {
             preg_match_all('/@property\s+(\S+)\s+\$?(\S+).*/', $classReflection->getDocComment(), $matches);
 
             foreach ($matches[0] as $i => $match) {
-                if (!$filter(trim($match))) {
+                if (!call_user_func($filter, trim($match))) {
                     continue;
                 }
 
