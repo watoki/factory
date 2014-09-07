@@ -1,19 +1,16 @@
 <?php
 namespace watoki\factory;
  
-use watoki\factory\filters\NullFilter;
-
 class FilterFactory {
+
+    public static $CLASS = __CLASS__;
 
     /** @var array|Filter[] */
     private $filters = array();
 
-    function __construct(Factory $factory) {
-        $factory->setSingleton(get_class($this), $this);
-    }
-
     /**
      * @param string $type
+     * @throws \Exception if Filter for type can't be found
      * @return Filter
      */
     public function getFilter($type) {
@@ -24,7 +21,7 @@ class FilterFactory {
             }
             $type = is_object($type) ? get_parent_class($type) : null;
         }
-        return new NullFilter();
+        throw new \InvalidArgumentException("Could not find filter for [$type]");
     }
 
     public function registerFilter($type, Filter $filter) {
