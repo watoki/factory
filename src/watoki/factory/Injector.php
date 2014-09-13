@@ -55,7 +55,7 @@ class Injector {
                     try {
                         $arg = $filters->getFilter($type)->filter($value);
                     } catch (\Exception $e) {
-                        throw new \Exception("Parameter [{$param->getName()}] is invalid: " . $e->getMessage());
+                        throw new \Exception("Cannot inject parameter [{$param->getName()}]. Argument is invalid: " . $e->getMessage());
                     }
                 } else {
                     $arg = $value;
