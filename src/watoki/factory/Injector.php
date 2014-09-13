@@ -52,7 +52,11 @@ class Injector {
             if ($this->hasValue($param, $args)) {
                 $value = $this->getValue($param, $args);
                 if ($type && $filters) {
-                    $arg = $filters->getFilter($type)->filter($value);
+                    try {
+                        $arg = $filters->getFilter($type)->filter($value);
+                    } catch (\Exception $e) {
+                        throw new \Exception("Parameter [{$param->getName()}] is invalid: " . $e->getMessage());
+                    }
                 } else {
                     $arg = $value;
                 }
