@@ -44,73 +44,14 @@ class Injector {
         return $reflection->invokeArgs($object, $args);
     }
 
-    public function injectMethodArguments(\ReflectionMethod $method, array $args, FilterFactory $filters = null) {
-        $argArray = array();
-        foreach ($method->getParameters() as $param) {
-            $type = $this->findTypeHint($method, $param);
-
-            if ($this->hasValue($param, $args)) {
-                $value = $this->getValue($param, $args);
-                if ($type && $filters) {
-                    try {
-                        $arg = $filters->getFilter($type)->filter($value);
-                    } catch (\Exception $e) {
-                        throw new \Exception("Cannot inject parameter [{$param->getName()}]. Argument is invalid: " . $e->getMessage());
-                    }
-                } else {
-                    $arg = $value;
-                }
-            } else if ($param->isDefaultValueAvailable()) {
-                $arg = $param->getDefaultValue();
-            } else if (!$type) {
-                throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}"
-                    . "::{$method->getName()}]: Argument not given and no type hint found.");
-            } else {
-                try {
-                    $arg = $this->factory->getInstance($type);
-                } catch (\Exception $e) {
-                    throw new \Exception("Cannot inject parameter [{$param->getName()}] of [{$method->getDeclaringClass()->getName()}"
-                        . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
-                }
-            }
-
-            $argArray[$param->getName()] = $arg;
+    public function injectMethodArguments(\ReflectionMethod $method, array $args) {
+        $analyzer = new MethodAnalyzer($method);
+        try {
+            return $analyzer->fillParameters($args, $this->factory);
+        } catch (\Exception $e) {
+            throw new \Exception("Cannot inject method [{$method->getDeclaringClass()->getName()}"
+                . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
         }
-        return $argArray;
-    }
-
-    private function findTypeHint(\ReflectionMethod $method, \ReflectionParameter $param) {
-        if ($param->getClass()) {
-            return $param->getClass()->getName();
-        }
-
-        $matches = array();
-        $pattern = '/@param\s+(\S+)\s+\$' . $param->getName() . '/';
-        $found = preg_match($pattern, $method->getDocComment(), $matches);
-
-        if (!$found) {
-            return null;
-        }
-        $type = $matches[1];
-
-        $resolver = new ClassResolver($method->getDeclaringClass());
-        $resolved = $resolver->resolve($type);
-
-        return $resolved ?: $type;
-    }
-
-    private function getValue(\ReflectionParameter $param, array $args) {
-        if (array_key_exists($param->getName(), $args)) {
-            return $args[$param->getName()];
-        } else if (array_key_exists($param->getPosition(), $args)) {
-            return $args[$param->getPosition()];
-        } else {
-            return null;
-        }
-    }
-
-    private function hasValue(\ReflectionParameter $param, array $args) {
-        return array_key_exists($param->getName(), $args) || array_key_exists($param->getPosition(), $args);
     }
 
     /**
@@ -147,7 +88,7 @@ class Injector {
      * @throws \Exception
      */
     public function injectProperties($object, $filter, \ReflectionClass $context = null) {
-        $classReflection = $context ?: new \ReflectionClass($object);
+        $classReflection = $context ? : new \ReflectionClass($object);
 
         foreach ($classReflection->getProperties() as $property) {
             $matches = array();

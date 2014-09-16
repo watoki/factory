@@ -80,7 +80,9 @@ class ConstructorInjectionTest extends Specification {
         }');
         $this->fix->whenITryToGet_WithArguments_FromTheFactory('MissingArgument', array('arg2' => 'Not enough'));
         $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenAnExceptionMessageShouldContain("Cannot inject parameter [arg1] of [MissingArgument::__construct]");
+        $this->fix->thenAnExceptionMessageShouldContain("Cannot inject method [MissingArgument::__construct]");
+        $this->fix->thenAnExceptionMessageShouldContain("Cannot fill parameter [arg1]");
+        $this->fix->thenAnExceptionMessageShouldContain("Argument not given and no type hint found.");
     }
 
     public function testInjectArgumentsByFactory() {
