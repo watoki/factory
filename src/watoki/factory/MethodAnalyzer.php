@@ -12,7 +12,7 @@ class MethodAnalyzer {
     /**
      * @param array $args
      * @param Factory $factory
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      * @return array
      */
     public function fillParameters(array $args, Factory $factory) {
@@ -20,8 +20,8 @@ class MethodAnalyzer {
         foreach ($this->method->getParameters() as $param) {
             try {
                 $argArray[$param->getName()] = $this->fillParameter($param, $args, $factory);
-            } catch (\Exception $e) {
-                throw new \Exception("Cannot fill parameter [{$param->getName()}]: " . $e->getMessage(), 0, $e);
+            } catch (\InvalidArgumentException $e) {
+                throw new \InvalidArgumentException("Cannot fill parameter [{$param->getName()}]: " . $e->getMessage(), 0, $e);
             }
         }
         return $argArray;
@@ -51,13 +51,20 @@ class MethodAnalyzer {
             return $this->getValue($param, $args);
         } else if ($param->isDefaultValueAvailable()) {
             return $param->getDefaultValue();
-        } else {
+        } else if ($this->isMarkedInjectable($param)) {
             $type = $this->getTypeHint($param);
             if (!$type) {
-                throw new \Exception("Argument not given and no type hint found.");
+                throw new \InvalidArgumentException("Argument not given and no type hint found.");
             }
             return $factory->getInstance($type);
+        } else {
+            throw new \InvalidArgumentException("Argument not given and not marked as injectable.");
         }
+    }
+
+    private function isMarkedInjectable(\ReflectionParameter $param) {
+        $pattern = '/@param.+\$' . $param->getName() . '.+' . Injector::INJECTION_MARKER . '/';
+        return preg_match($pattern, $this->method->getDocComment());
     }
 
     public function getTypeHint(\ReflectionParameter $param) {

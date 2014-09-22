@@ -1,16 +1,20 @@
 <?php
 namespace spec\watoki\factory;
 
-use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
+ * If an object is registered as a singleton of a class, it will be returned each time an instance of this class is requested.
+ *
  * @property FactoryFixture factoryFix <-
  */
 class SingletonTest extends Specification {
 
     public function testSingleton() {
         $this->factoryFix->givenTheClassDefinition('class Singleton {
+            /**
+             * @param $factory <-
+             */
             function __construct(\watoki\factory\Factory $factory) {
                 $factory->setSingleton(__CLASS__, $this);
             }
@@ -27,6 +31,9 @@ class SingletonTest extends Specification {
 
     public function testGetExistingSingleton() {
         $this->factoryFix->givenTheClassDefinition('class SomeSingleton {
+            /**
+             * @param $factory <-
+             */
             function __construct(\watoki\factory\Factory $factory, $arg) {
                 $factory->setSingleton(__CLASS__, $this);
                 $this->arg = $arg;

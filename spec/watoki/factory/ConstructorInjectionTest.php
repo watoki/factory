@@ -4,49 +4,44 @@ namespace spec\watoki\factory;
 use watoki\scrut\Specification;
 
 /**
+ * As injectable marked parameters of a constructor (any method, actually) are injected if possible.
+ *
  * @property FactoryFixture $fix <-
  */
 class ConstructorInjectionTest extends Specification {
 
+    protected function background() {
+        $this->fix->givenTheClassDefinition('class StandardConstructor {
+            /**
+             * @param $arg1 <-
+             * @param $arg2 <-
+             */
+            function __construct($arg1, $arg2) {
+                $this->msg = $arg1 . $arg2;
+            }
+        }');
+    }
+
     public function testEmptyConstructor() {
         $this->fix->givenTheClassDefinition('class SomeClass {}');
+
         $this->fix->whenIGet_FromTheFactory('SomeClass');
         $this->fix->thenTheObjectShouldBeAnInstanceOf('SomeClass');
     }
 
-    public function testConstructorArguments() {
-        $this->fix->givenTheClassDefinition('class ClassWithConstructor {
-            function __construct($arg1, $arg2) {
-                $this->msg = $arg1 . $arg2;
-            }
-        }');
-        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructor', array('arg2' => ' World', 'arg1' => 'Hello'));
-
-        $this->fix->thenTheObjectShouldBeAnInstanceOf('ClassWithConstructor');
+    public function testMarkedArguments() {
+        $this->fix->whenIGet_WithArguments_FromTheFactory('StandardConstructor', array('arg2' => ' World', 'arg1' => 'Hello'));
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('StandardConstructor');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
-    public function testConstructorArgumentsInList() {
-        $this->fix->givenTheClassDefinition('class ClassWithConstructorInList {
-            function __construct($arg1, $arg2) {
-                $this->msg = $arg1 . $arg2;
-            }
-        }');
-
-        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorInList', array('Hello', ' You'));
-
+    public function testArgumentsAsList() {
+        $this->fix->whenIGet_WithArguments_FromTheFactory('StandardConstructor', array('Hello', ' You'));
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello You');
     }
 
-    public function testConstructorArgumentsMixed() {
-        $this->fix->givenTheClassDefinition('class ClassWithConstructorMixed {
-            function __construct($arg1, $arg2) {
-                $this->msg = $arg1 . $arg2;
-            }
-        }');
-
-        $this->fix->whenIGet_WithArguments_FromTheFactory('ClassWithConstructorMixed', array('arg2' => ' World', 0 => 'Hello'));
-
+    public function testArgumentsMixedIndexAndName() {
+        $this->fix->whenIGet_WithArguments_FromTheFactory('StandardConstructor', array('arg2' => ' World', 0 => 'Hello'));
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
@@ -56,48 +51,68 @@ class ConstructorInjectionTest extends Specification {
                 $this->msg = $argRequired . $argDefault;
             }
         }');
+
         $this->fix->whenIGet_WithArguments_FromTheFactory('DefaultArguments', array('argRequired' => 'Hello'));
         $this->fix->thenTheObjectShouldBeAnInstanceOf('DefaultArguments');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
     }
 
-    public function testDontInjectDefaultArgument() {
-        $this->fix->givenTheClassDefinition('class DontInjectDefaultArgument {
-            function __construct(StdClass $dont = null) {
-                $this->dont = $dont;
-            }
-        }');
-        $this->fix->whenIGet_FromTheFactory('DontInjectDefaultArgument');
-        $this->fix->thenTheObjectShouldBeAnInstanceOf('DontInjectDefaultArgument');
-        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('dont', null);
-    }
-
     public function testMissingArguments() {
-        $this->fix->givenTheClassDefinition('class MissingArgument {
-            function __construct($arg1, $arg2) {
-                $this->msg = $arg1 . $arg2;
-            }
-        }');
-        $this->fix->whenITryToGet_WithArguments_FromTheFactory('MissingArgument', array('arg2' => 'Not enough'));
+        $this->fix->whenITryToGet_WithArguments_FromTheFactory('StandardConstructor', array('arg2' => 'Not enough'));
         $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenAnExceptionMessageShouldContain("Cannot inject method [MissingArgument::__construct]");
+        $this->fix->thenAnExceptionMessageShouldContain("Cannot inject method [StandardConstructor::__construct]");
         $this->fix->thenAnExceptionMessageShouldContain("Cannot fill parameter [arg1]");
         $this->fix->thenAnExceptionMessageShouldContain("Argument not given and no type hint found.");
     }
 
-    public function testInjectArgumentsByFactory() {
+    public function testInjectArgumentsWithFactory() {
         $this->fix->givenTheClassDefinition('class InjectMe {
             function __construct($msg = "Hello World") {
                 $this->greeting = $msg;
             }
         }');
         $this->fix->givenTheClassDefinition('class InjectingOne {
+            /**
+             * @param $arg1 <-
+             */
             function __construct(InjectMe $arg1) {
                 $this->msg = $arg1->greeting;
             }
         }');
+
         $this->fix->whenIGet_FromTheFactory('InjectingOne');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
+    }
+
+    public function testOnlyInjectIfParameterIsMarked() {
+        $this->fix->givenTheClassDefinition('class OnlyInjectIfParameterIsMarked {
+            /**
+             * @param $arg1 <-
+             * @param $arg2 Marker can be <- anywhere
+             * @param $arg3
+             */
+            function __construct(StdClass $arg1, StdClass $arg2, StdClass $arg3) {}
+        }');
+
+        $this->fix->whenITryToGet_FromTheFactory('OnlyInjectIfParameterIsMarked');
+        $this->fix->thenAnExceptionShouldBeThrown();
+        $this->fix->thenAnExceptionMessageShouldContain("Cannot fill parameter [arg3]");
+        $this->fix->thenAnExceptionMessageShouldContain("Argument not given and not marked as injectable.");
+    }
+
+    public function testDoNotInjectDefaultArgument() {
+        $this->fix->givenTheClassDefinition('class DontInjectDefaultArgument {
+            /**
+             * @param $dont <-
+             */
+            function __construct(StdClass $dont = null) {
+                $this->dont = $dont;
+            }
+        }');
+
+        $this->fix->whenIGet_FromTheFactory('DontInjectDefaultArgument');
+        $this->fix->thenTheObjectShouldBeAnInstanceOf('DontInjectDefaultArgument');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('dont', null);
     }
 
     public function testMixGivenAndInjectedArguments() {
@@ -107,20 +122,28 @@ class ConstructorInjectionTest extends Specification {
             }
         }');
         $this->fix->givenTheClassDefinition('class InjectingTwo {
+            /**
+             * @param $arg1 <-
+             */
             function __construct(InjectMeToo $arg1, $arg2, $arg3 = "!") {
                 $this->msg = $arg1->greeting . $arg2 . $arg3;
             }
         }');
+
         $this->fix->whenIGet_WithArguments_FromTheFactory('InjectingTwo', array('arg2' => ' World'));
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World!');
     }
 
     public function testInjectFactory() {
         $this->fix->givenTheClassDefinition('class InjectFactory {
+            /**
+             * @param $factory <-
+             */
             function __construct(\watoki\factory\Factory $factory) {
                 $this->factory = $factory;
             }
         }');
+
         $this->fix->whenIGet_FromTheFactory('InjectFactory');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeTheFactory('factory');
     }
@@ -132,36 +155,33 @@ class ConstructorInjectionTest extends Specification {
             }
         }');
         $this->fix->givenTheClassDefinition('class RecursiveInjectionTwo {
+            /**
+             * @param $one <-
+             */
             function __construct(RecursiveInjectionOne $one, $msg = " World") {
                 $this->msg = $one->msg . $msg;
             }
         }');
         $this->fix->givenTheClassDefinition('class RecursiveInjectionThree {
+            /**
+             * @param $two <-
+             */
             function __construct(RecursiveInjectionTwo $two) {
                 $this->msg = $two->msg;
             }
         }');
+
         $this->fix->whenIGet_FromTheFactory('RecursiveInjectionThree');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBe('msg', 'Hello World');
-    }
-
-    public function testOptionalClassArgument() {
-        $this->fix->givenTheClassDefinition('class OptionalClassArgument {
-            function __construct(\DateTime $date = null) {
-                $this->date = $date;
-            }
-        }');
-        $this->fix->whenIGet_FromTheFactory('OptionalClassArgument');
-        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('date', null);
     }
 
     public function testDocCommentTypeHints() {
         $this->fix->givenTheClassDefinition('class DocCommentHints {
             /**
-             * @param StdClass $one
-             * @param DateTime $two
-             * @param StdClass $three
-             * @param object $four
+             * @param StdClass $one <-
+             * @param DateTime $two <-
+             * @param StdClass $three <-
+             * @param object $four <-
              */
             function __construct($one, StdClass $two, $three = "foo", $four = "bar") {
                 $this->one = $one;
@@ -170,6 +190,7 @@ class ConstructorInjectionTest extends Specification {
                 $this->four = $four;
             }
         }');
+
         $this->fix->whenIGet_FromTheFactory('DocCommentHints');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('two', 'StdClass');
@@ -183,12 +204,13 @@ class ConstructorInjectionTest extends Specification {
         namespace one;
         class RelativeTypeHints {
             /**
-             * @param two\RelativeDependency $one
+             * @param two\RelativeDependency $one <-
              */
             function __construct($one) {
                 $this->one = $one;
             }
         }');
+
         $this->fix->whenIGet_FromTheFactory('one\RelativeTypeHints');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'one\two\RelativeDependency');
     }
@@ -196,8 +218,12 @@ class ConstructorInjectionTest extends Specification {
     public function testAbstractDependency() {
         $this->fix->givenTheClassDefinition('abstract class AbstractDependency {}');
         $this->fix->givenTheClassDefinition('class HasAbstractDependency {
+            /**
+             * @param $itsAbstract <-
+             */
             function __construct(AbstractDependency $itsAbstract) {}
         }');
+
         $this->fix->whenITryToGet_FromTheFactory('HasAbstractDependency');
         $this->fix->thenAnExceptionShouldBeThrown();
     }
@@ -205,10 +231,28 @@ class ConstructorInjectionTest extends Specification {
     public function testInterfaceDependency() {
         $this->fix->givenTheClassDefinition('interface InterfaceDependency {}');
         $this->fix->givenTheClassDefinition('class HasInterfaceDependency {
+            /**
+             * @param $itsAbstract
+             */
             function __construct(InterfaceDependency $itsAbstract) {}
         }');
+
         $this->fix->whenITryToGet_FromTheFactory('HasInterfaceDependency');
         $this->fix->thenAnExceptionShouldBeThrown();
+    }
+
+    public function testMethodInjection() {
+        $this->fix->givenTheClassDefinition('class MethodInjection {
+            /**
+             * @param $one <-
+             */
+            public function inject(StdClass $one) {
+                $this->one = $one;
+            }
+        }');
+
+        $this->fix->whenIGet_FromTheFactory('MethodInjection');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
     }
 
 }

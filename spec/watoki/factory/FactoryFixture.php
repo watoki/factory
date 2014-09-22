@@ -21,6 +21,12 @@ class FactoryFixture extends Fixture {
 
     private $counter = 0;
 
+    private static $alreadyDefined = array();
+
+    /**
+     * @param Specification $spec
+     * @param Factory $factory <-
+     */
     public function __construct(Specification $spec, Factory $factory) {
         parent::__construct($spec, $factory);
         self::$loaded = array();
@@ -48,6 +54,11 @@ class FactoryFixture extends Fixture {
     }
 
     public function givenTheClassDefinition($definition) {
+        $hash = md5($definition);
+        if (in_array($hash, self::$alreadyDefined)) {
+            return;
+        }
+        self::$alreadyDefined[] = $hash;
         $dir = __DIR__ . '/tmp';
         $file = $dir . '/' . $this->spec->getName() . $this->counter++ . '.php';
         @mkdir($dir);

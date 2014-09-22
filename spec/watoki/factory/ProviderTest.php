@@ -1,10 +1,11 @@
 <?php
 namespace spec\watoki\factory;
 
-use spec\watoki\factory\FactoryFixture;
 use watoki\scrut\Specification;
 
 /**
+ * Providers can be used to create instances of classes on-demand.
+ *
  * @property \spec\watoki\factory\FactoryFixture factoryFix <-
  */
 class ProviderTest extends Specification {

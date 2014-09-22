@@ -4,6 +4,8 @@ namespace spec\watoki\factory;
 use watoki\scrut\Specification;
 
 /**
+ * Annotation properties are injected like regular properties.
+ *
  * @property FactoryFixture $factoryFix <-
  */
 class PropertyAnnotationInjectionTest extends Specification {

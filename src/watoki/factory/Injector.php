@@ -48,8 +48,8 @@ class Injector {
         $analyzer = new MethodAnalyzer($method);
         try {
             return $analyzer->fillParameters($args, $this->factory);
-        } catch (\Exception $e) {
-            throw new \Exception("Cannot inject method [{$method->getDeclaringClass()->getName()}"
+        } catch (\InvalidArgumentException $e) {
+            throw new \InvalidArgumentException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
                 . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
         }
     }
@@ -74,7 +74,9 @@ class Injector {
                     continue;
                 }
 
-                $this->injectProperty($object, $matches[2][$i], $resolver->resolve($matches[1][$i]));
+                $class = $matches[1][$i];
+                $propertyName = $matches[2][$i];
+                $this->injectProperty($object, $propertyName, $resolver->resolve($class));
             }
 
             $classReflection = $classReflection->getParentClass();
