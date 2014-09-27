@@ -1,6 +1,7 @@
 <?php
 namespace spec\watoki\factory;
 
+use watoki\factory\exception\InjectionException;
 use watoki\scrut\Specification;
 
 /**
@@ -264,7 +265,7 @@ class ConstructorInjectionTest extends Specification {
         }');
 
         $this->fix->whenITryToGet_FromTheFactory('InvalidConstructorInjection');
-        $this->fix->thenAnExceptionShouldBeThrown();
+        $this->fix->thenA_ShouldBeThrown(InjectionException::$CLASS);
         $this->fix->thenTheExceptionMessageShouldContain('Error while injecting constructor of [InvalidConstructorInjection]: Class NonExistentCLass does not exist');
     }
 

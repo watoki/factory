@@ -109,7 +109,12 @@ class FactoryFixture extends Fixture {
     }
 
     public function thenAnExceptionShouldBeThrown() {
+        $this->thenA_ShouldBeThrown('Exception');
+    }
+
+    public function thenA_ShouldBeThrown($class) {
         $this->spec->assertNotNull($this->caught);
+        $this->spec->assertInstanceOf($class, $this->caught);
     }
 
     public function whenIGetTheSingleton($className) {

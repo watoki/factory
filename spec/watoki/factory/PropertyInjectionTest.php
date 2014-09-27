@@ -1,6 +1,7 @@
 <?php
 namespace spec\watoki\factory;
 
+use watoki\factory\exception\InjectionException;
 use watoki\factory\providers\DefaultProvider;
 use watoki\scrut\Specification;
 
@@ -105,8 +106,8 @@ class PropertyInjectionTest extends Specification {
         }');
 
         $this->fix->whenITryToGet_FromTheFactory('InvalidPropertyInjection');
-        $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenTheExceptionMessageShouldContain('Error while loading dependency [foo] of [InvalidPropertyInjection]: Could not find [NonExistentClass].');
+        $this->fix->thenA_ShouldBeThrown(InjectionException::$CLASS);
+        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting dependency [foo] of [InvalidPropertyInjection]: Could not find [NonExistentClass].');
     }
 
     public function testCascadingInjectionErrors() {
@@ -124,10 +125,10 @@ class PropertyInjectionTest extends Specification {
         }');
 
         $this->fix->whenITryToGet_FromTheFactory('CascadingPropertyInjection');
-        $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenTheExceptionMessageShouldContain('Error while loading dependency [foo] of [CascadingPropertyInjection]: ' .
+        $this->fix->thenA_ShouldBeThrown(InjectionException::$CLASS);
+        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting dependency [foo] of [CascadingPropertyInjection]: ' .
                 'Error while injecting constructor of [CascadingConstructorInjection]: ' .
-                'Error while loading dependency [baz] of [CascadingAnnotationInjection]: ' .
+                'Error while injecting dependency [baz] of [CascadingAnnotationInjection]: ' .
                 'Could not find [NotExisting].');
     }
 

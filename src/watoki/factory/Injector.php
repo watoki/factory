@@ -1,6 +1,8 @@
 <?php
 namespace watoki\factory;
 
+use watoki\factory\exception\InjectionException;
+
 class Injector {
 
     const INJECTION_MARKER = '<-';
@@ -23,7 +25,7 @@ class Injector {
         $reflection = new \ReflectionClass($class);
 
         if ($reflection->isAbstract() || $reflection->isInterface()) {
-            throw new \Exception("Cannot instantiate abstract class [$class].");
+            throw new InjectionException("Cannot instantiate abstract class [$class].");
         }
 
         if (!$reflection->getConstructor()) {
@@ -32,8 +34,10 @@ class Injector {
 
         try {
             return $reflection->newInstanceArgs($this->injectMethodArguments($reflection->getConstructor(), $args));
-        } catch (\Exception $e) {
-            throw new \Exception('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $e->getMessage());
+        } catch (InjectionException $e) {
+            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $e->getMessage());
+        } catch (\ReflectionException $re) {
+            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $re->getMessage());
         }
     }
 
@@ -49,7 +53,7 @@ class Injector {
         try {
             return $analyzer->fillParameters($args, $this->factory);
         } catch (\InvalidArgumentException $e) {
-            throw new \InvalidArgumentException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
+            throw new InjectionException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
                 . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
         }
     }
@@ -58,7 +62,7 @@ class Injector {
      * @param object $object The object that the properties are injected into
      * @param callable $filter Function to determine if the passed property annotation should be included
      * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
-     * @throws \Exception
+     * @throws InjectionException
      */
     public function injectPropertyAnnotations($object, $filter, \ReflectionClass $context = null) {
         $classReflection = $context ? : new \ReflectionClass($object);
@@ -87,7 +91,7 @@ class Injector {
      * @param object $object The object that the properties are injected into
      * @param callable $filter Function to determine if the passed \ReflectionProperty should be included
      * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
-     * @throws \Exception
+     * @throws InjectionException
      */
     public function injectProperties($object, $filter, \ReflectionClass $context = null) {
         $classReflection = $context ? : new \ReflectionClass($object);
@@ -108,9 +112,9 @@ class Injector {
     private function tryToInjectProperty($targetObject, $propertyName, ClassResolver $resolver, $class) {
         try {
             $this->injectProperty($targetObject, $propertyName, $resolver, $class);
-        } catch (\Exception $e) {
+        } catch (InjectionException $e) {
             $targetClass = get_class($targetObject);
-            throw new \Exception("Error while loading dependency [$propertyName] " .
+            throw new InjectionException("Error while injecting dependency [$propertyName] " .
                     "of [$targetClass]: " . $e->getMessage(), 0, $e);
         }
     }
@@ -121,21 +125,22 @@ class Injector {
 
         if (!$type) {
             if ($this->throwException) {
-                throw new \Exception("Could not find [$class].");
+                throw new InjectionException("Could not find [$class].");
             } else {
                 return;
             }
         }
 
+        $instance = $this->factory->getInstance($type);
         if ($classReflection->hasProperty($propertyName)) {
             $reflectionProperty = $classReflection->getProperty($propertyName);
             $reflectionProperty->setAccessible(true);
 
             if ($reflectionProperty->getValue($targetObject) === null) {
-                $reflectionProperty->setValue($targetObject, $this->factory->getInstance($type));
+                $reflectionProperty->setValue($targetObject, $instance);
             }
         } else {
-            $targetObject->$propertyName = $this->factory->getInstance($type);
+            $targetObject->$propertyName = $instance;
         }
 
     }
