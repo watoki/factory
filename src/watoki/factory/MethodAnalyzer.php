@@ -21,7 +21,9 @@ class MethodAnalyzer {
             try {
                 $argArray[$param->getName()] = $this->fillParameter($param, $args, $factory);
             } catch (\InvalidArgumentException $e) {
-                throw new \InvalidArgumentException("Cannot fill parameter [{$param->getName()}]: " . $e->getMessage(), 0, $e);
+                $methodName = $this->method->getDeclaringClass()->getName() . '::' . $this->method->getName();
+                throw new \InvalidArgumentException("Cannot fill parameter [{$param->getName()}] of [$methodName]: "
+                        . $e->getMessage(), 0, $e);
             }
         }
         return $argArray;
@@ -101,4 +103,4 @@ class MethodAnalyzer {
         return array_key_exists($param->getName(), $args) || array_key_exists($param->getPosition(), $args);
     }
 
-} 
+}
