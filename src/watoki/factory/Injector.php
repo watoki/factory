@@ -33,7 +33,7 @@ class Injector {
         try {
             return $reflection->newInstanceArgs($this->injectMethodArguments($reflection->getConstructor(), $args));
         } catch (\Exception $e) {
-            throw new \Exception('Error while injecting constructor of ' . $reflection->getName() . ': ' . $e->getMessage());
+            throw new \Exception('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $e->getMessage());
         }
     }
 
@@ -76,7 +76,7 @@ class Injector {
 
                 $class = $matches[1][$i];
                 $propertyName = $matches[2][$i];
-                $this->injectProperty($object, $propertyName, $resolver->resolve($class));
+                $this->tryToInjectProperty($object, $propertyName, $resolver, $class);
             }
 
             $classReflection = $classReflection->getParentClass();
@@ -101,17 +101,27 @@ class Injector {
             }
 
             $resolver = new ClassResolver($property->getDeclaringClass());
-            $this->injectProperty($object, $property->getName(), $resolver->resolve($matches[1]));
+            $this->tryToInjectProperty($object, $property->getName(), $resolver, $matches[1]);
         }
     }
 
-    private function injectProperty($targetObject, $propertyName, $type) {
+    private function tryToInjectProperty($targetObject, $propertyName, ClassResolver $resolver, $class) {
+        try {
+            $this->injectProperty($targetObject, $propertyName, $resolver, $class);
+        } catch (\Exception $e) {
+            $targetClass = get_class($targetObject);
+            throw new \Exception("Error while loading dependency [$propertyName] " .
+                    "of [$targetClass]: " . $e->getMessage(), 0, $e);
+        }
+    }
+
+    private function injectProperty($targetObject, $propertyName, ClassResolver $resolver, $class) {
+        $type = $resolver->resolve($class);
         $classReflection = new \ReflectionClass($targetObject);
 
         if (!$type) {
             if ($this->throwException) {
-                throw new \Exception("Error while loading dependency [$propertyName] of [{$classReflection->getShortName()}]: "
-                    . "Could not find [$type].");
+                throw new \Exception("Could not find [$class].");
             } else {
                 return;
             }

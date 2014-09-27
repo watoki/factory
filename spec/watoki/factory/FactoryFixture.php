@@ -155,7 +155,7 @@ class FactoryFixture extends Fixture {
         $this->spec->assertTrue($this->factory === $this->instance->$prop);
     }
 
-    public function thenAnExceptionMessageShouldContain($string) {
+    public function thenTheExceptionMessageShouldContain($string) {
         $this->spec->assertContains($string, $this->caught->getMessage());
     }
 

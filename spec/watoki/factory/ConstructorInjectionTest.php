@@ -60,9 +60,9 @@ class ConstructorInjectionTest extends Specification {
     public function testMissingArguments() {
         $this->fix->whenITryToGet_WithArguments_FromTheFactory('StandardConstructor', array('arg2' => 'Not enough'));
         $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenAnExceptionMessageShouldContain("Cannot inject method [StandardConstructor::__construct]");
-        $this->fix->thenAnExceptionMessageShouldContain("Cannot fill parameter [arg1]");
-        $this->fix->thenAnExceptionMessageShouldContain("Argument not given and no type hint found.");
+        $this->fix->thenTheExceptionMessageShouldContain("Cannot inject method [StandardConstructor::__construct]");
+        $this->fix->thenTheExceptionMessageShouldContain("Cannot fill parameter [arg1]");
+        $this->fix->thenTheExceptionMessageShouldContain("Argument not given and no type hint found.");
     }
 
     public function testInjectArgumentsWithFactory() {
@@ -96,8 +96,8 @@ class ConstructorInjectionTest extends Specification {
 
         $this->fix->whenITryToGet_FromTheFactory('OnlyInjectIfParameterIsMarked');
         $this->fix->thenAnExceptionShouldBeThrown();
-        $this->fix->thenAnExceptionMessageShouldContain("Cannot fill parameter [arg3]");
-        $this->fix->thenAnExceptionMessageShouldContain("Argument not given and not marked as injectable.");
+        $this->fix->thenTheExceptionMessageShouldContain("Cannot fill parameter [arg3]");
+        $this->fix->thenTheExceptionMessageShouldContain("Argument not given and not marked as injectable.");
     }
 
     public function testDoNotInjectDefaultArgument() {
@@ -253,6 +253,19 @@ class ConstructorInjectionTest extends Specification {
 
         $this->fix->whenIGet_FromTheFactory('MethodInjection');
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
+    }
+
+    public function testInvalidConstructorInjection() {
+        $this->fix->givenTheClassDefinition('class InvalidConstructorInjection {
+            /**
+             * @param NonExistentCLass $one <-
+             */
+            public function __construct($one) {}
+        }');
+
+        $this->fix->whenITryToGet_FromTheFactory('InvalidConstructorInjection');
+        $this->fix->thenAnExceptionShouldBeThrown();
+        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting constructor of [InvalidConstructorInjection]: Class NonExistentCLass does not exist');
     }
 
 }

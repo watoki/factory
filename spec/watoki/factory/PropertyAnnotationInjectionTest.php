@@ -6,39 +6,39 @@ use watoki\scrut\Specification;
 /**
  * Annotation properties are injected like regular properties.
  *
- * @property FactoryFixture $factoryFix <-
+ * @property FactoryFixture $fix <-
  */
 class PropertyAnnotationInjectionTest extends Specification {
 
     public function testFullyQualifiedClassNames() {
-        $this->factoryFix->givenTheClass_InTheNamespace('FullNameDependency', 'some\name\space');
-        $this->factoryFix->givenTheClass_WithTheDocComment('FullName', '
+        $this->fix->givenTheClass_InTheNamespace('FullNameDependency', 'some\name\space');
+        $this->fix->givenTheClass_WithTheDocComment('FullName', '
             /**
              * @property some\name\space\FullNameDependency foo <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('FullName');
+        $this->fix->whenIGet_FromTheFactory('FullName');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\FullNameDependency');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\FullNameDependency');
     }
 
     public function testRelativeNamespace() {
-        $this->factoryFix->givenTheClass_InTheNamespace('RelativeDependency', 'some\name\space');
-        $this->factoryFix->givenTheClass_InTheNameSpace_WithTheDocComment('Relative', 'some\name', '
+        $this->fix->givenTheClass_InTheNamespace('RelativeDependency', 'some\name\space');
+        $this->fix->givenTheClass_InTheNameSpace_WithTheDocComment('Relative', 'some\name', '
             /**
              * @property space\RelativeDependency foo <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('some\name\Relative');
+        $this->fix->whenIGet_FromTheFactory('some\name\Relative');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\RelativeDependency');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\RelativeDependency');
     }
 
     public function testClassAliases() {
-        $this->factoryFix->givenTheClass_InTheNamespace('AliasedDependency', 'some\name\space');
-        $this->factoryFix->givenTheClass_WithTheDocComment('Aliased', '
+        $this->fix->givenTheClass_InTheNamespace('AliasedDependency', 'some\name\space');
+        $this->fix->givenTheClass_WithTheDocComment('Aliased', '
             use some\name\space\AliasedDependency;
 
             /**
@@ -46,53 +46,53 @@ class PropertyAnnotationInjectionTest extends Specification {
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('Aliased');
+        $this->fix->whenIGet_FromTheFactory('Aliased');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\AliasedDependency');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\AliasedDependency');
     }
 
     public function testWhitespaces() {
-        $this->factoryFix->givenTheClass_WithTheDocComment('Whitespaces', '
+        $this->fix->givenTheClass_WithTheDocComment('Whitespaces', '
             /**
              * @property        StdClass    tabs    <-
              * @property    StdClass    spaces   <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('Whitespaces');
+        $this->fix->whenIGet_FromTheFactory('Whitespaces');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('tabs', 'StdClass');
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('spaces', 'StdClass');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('tabs', 'StdClass');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('spaces', 'StdClass');
     }
 
     public function testDontInjectNotMarkedProperties() {
-        $this->factoryFix->givenTheClass_WithTheDocComment('NotMarked', '
+        $this->fix->givenTheClass_WithTheDocComment('NotMarked', '
             /**
              * @property StdClass not
              * @property StdClass marked <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('NotMarked');
+        $this->fix->whenIGet_FromTheFactory('NotMarked');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('marked', 'StdClass');
-        $this->factoryFix->thenTheShouldBeNoProperty('not');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('marked', 'StdClass');
+        $this->fix->thenTheShouldBeNoProperty('not');
     }
 
     public function testInjectPropertyWithDollarSign() {
-        $this->factoryFix->givenTheClass_WithTheDocComment('DollarSign', '
+        $this->fix->givenTheClass_WithTheDocComment('DollarSign', '
             /**
              * @property StdClass $foo <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('DollarSign');
+        $this->fix->whenIGet_FromTheFactory('DollarSign');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
     }
 
     public function testInjectProtectedAndPrivateProperty() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             /**
              * @property StdClass protected <-
              * @property StdClass private <-
@@ -103,72 +103,72 @@ class PropertyAnnotationInjectionTest extends Specification {
             }
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('ProtectedAndPrivate');
+        $this->fix->whenIGet_FromTheFactory('ProtectedAndPrivate');
 
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('private', 'StdClass');
-        $this->factoryFix->theTheProperty_ShouldBeAnInstanceOf('protected', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('private', 'StdClass');
+        $this->fix->theTheProperty_ShouldBeAnInstanceOf('protected', 'StdClass');
     }
 
     public function testOrder() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class First {
                 function __construct() {
                     \spec\watoki\factory\FactoryFixture::$loaded[] = get_class($this);
                 }
             }
         ');
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class Second {
                 function __construct() {
                     \spec\watoki\factory\FactoryFixture::$loaded[] = get_class($this);
                 }
             }
         ');
-        $this->factoryFix->givenTheClass_WithTheDocComment('OrderMatters', '
+        $this->fix->givenTheClass_WithTheDocComment('OrderMatters', '
             /**
              * @property First foo <-
              * @property Second bar <-
              */
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('OrderMatters');
+        $this->fix->whenIGet_FromTheFactory('OrderMatters');
 
-        $this->factoryFix->thenTheLoadedDependency_ShouldBe(1, 'First');
-        $this->factoryFix->thenTheLoadedDependency_ShouldBe(2, 'Second');
+        $this->fix->thenTheLoadedDependency_ShouldBe(1, 'First');
+        $this->fix->thenTheLoadedDependency_ShouldBe(2, 'Second');
     }
 
     public function testCreateMembers() {
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             /**
              * @property StdClass foo <-
              */
             class BaseAnnotationClass {}
         ');
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             /**
              * @property StdClass bar <-
              */
             class ChildAnnotationClass extends BaseAnnotationClass {}
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('ChildAnnotationClass');
+        $this->fix->whenIGet_FromTheFactory('ChildAnnotationClass');
 
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('bar', 'StdClass');
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('bar', 'StdClass');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'StdClass');
     }
 
     public function testInheritPropertyAnnotation() {
-        $this->factoryFix->givenTheClass_InTheNamespace('BaseClassDependency', 'some\name\space');
-        $this->factoryFix->givenTheClass_WithTheDocComment('BaseWithInjectedProperty', '
+        $this->fix->givenTheClass_InTheNamespace('BaseClassDependency', 'some\name\space');
+        $this->fix->givenTheClass_WithTheDocComment('BaseWithInjectedProperty', '
             /**
              * @property some\name\space\BaseClassDependency foo <-
              */
         ');
-        $this->factoryFix->givenTheClassDefinition('
+        $this->fix->givenTheClassDefinition('
             class InheritsProperty extends BaseWithInjectedProperty {}
         ');
 
-        $this->factoryFix->whenIGet_FromTheFactory('InheritsProperty');
-        $this->factoryFix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\BaseClassDependency');
+        $this->fix->whenIGet_FromTheFactory('InheritsProperty');
+        $this->fix->thenThereShouldBeAProperty_WithAnInstanceOf('foo', 'some\name\space\BaseClassDependency');
     }
 }

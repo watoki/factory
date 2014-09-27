@@ -98,6 +98,39 @@ class PropertyInjectionTest extends Specification {
         $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('foo', 'here\MyAliasedClass');
     }
 
+    public function testInvalidPropertyInjection() {
+        $this->fix->givenTheClassDefinition('class InvalidPropertyInjection {
+            /** @var NonExistentClass <- */
+            public $foo;
+        }');
+
+        $this->fix->whenITryToGet_FromTheFactory('InvalidPropertyInjection');
+        $this->fix->thenAnExceptionShouldBeThrown();
+        $this->fix->thenTheExceptionMessageShouldContain('Error while loading dependency [foo] of [InvalidPropertyInjection]: Could not find [NonExistentClass].');
+    }
+
+    public function testCascadingInjectionErrors() {
+        $this->fix->givenTheClass_WithTheDocComment('CascadingAnnotationInjection', '
+        /**
+         * @property NotExisting $baz <-
+         */');
+        $this->fix->givenTheClassDefinition('class CascadingConstructorInjection {
+            /** @param $bar <- */
+            function __construct(CascadingAnnotationInjection $bar) {}
+        }');
+        $this->fix->givenTheClassDefinition('class CascadingPropertyInjection {
+            /** @var CascadingConstructorInjection <- */
+            public $foo;
+        }');
+
+        $this->fix->whenITryToGet_FromTheFactory('CascadingPropertyInjection');
+        $this->fix->thenAnExceptionShouldBeThrown();
+        $this->fix->thenTheExceptionMessageShouldContain('Error while loading dependency [foo] of [CascadingPropertyInjection]: ' .
+                'Error while injecting constructor of [CascadingConstructorInjection]: ' .
+                'Error while loading dependency [baz] of [CascadingAnnotationInjection]: ' .
+                'Could not find [NotExisting].');
+    }
+
     /** @var DefaultProvider */
     private $provider;
 
