@@ -13,6 +13,6 @@ class CallbackProvider implements Provider {
     }
 
     public function provide($class, array $args = array()) {
-        call_user_func($this->callback, $class, $args);
+        return call_user_func($this->callback, $class, $args);
     }
 }
