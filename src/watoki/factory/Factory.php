@@ -38,21 +38,25 @@ class Factory {
     }
 
     /**
-     * Returns the previously as singleton registered instance.
+     * Returns the previously as singleton registered instance or creates one as singleton.
      *
-     * Use this method if you expect the instance to have been created centrally.
+     * If $args are provided, a new singleton instance will be created.
      *
      * @param string $class
+     * @param null|array $args
+     * @throws \Exception If no $args are provided and no singleton of $class is registered.
      * @return mixed The already existing instance of the given class
-     * @throws \Exception
      */
-    public function getSingleton($class) {
+    public function getSingleton($class, $args = null) {
         $normalized = $this->normalizeClass($class);
 
-        if (!isset($this->singletons[$normalized])) {
+        if (isset($this->singletons[$normalized])) {
+            return $this->singletons[$normalized];
+        } else if (!is_null($args)) {
+            return $this->setSingleton($class, $this->getInstance($class, $args));
+        } else {
             throw new \Exception("Instance of [$class] does not exist.");
         }
-        return $this->singletons[$normalized];
     }
 
     /**

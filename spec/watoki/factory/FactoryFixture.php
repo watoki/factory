@@ -3,7 +3,6 @@ namespace spec\watoki\factory;
 
 use watoki\factory\Factory;
 use watoki\scrut\Fixture;
-use watoki\scrut\Specification;
 
 class FactoryFixture extends Fixture {
 
@@ -23,12 +22,8 @@ class FactoryFixture extends Fixture {
 
     private static $alreadyDefined = array();
 
-    /**
-     * @param Specification $spec
-     * @param Factory $factory <-
-     */
-    public function __construct(Specification $spec, Factory $factory) {
-        parent::__construct($spec, $factory);
+    public function setUp() {
+        parent::setUp();
         self::$loaded = array();
         $this->factory = new Factory();
     }
@@ -119,6 +114,10 @@ class FactoryFixture extends Fixture {
 
     public function whenIGetTheSingleton($className) {
         $this->instance = $this->factory->getSingleton($className);
+    }
+
+    public function whenIGetTheSingleton_WithTheArguments($className, $args) {
+        $this->instance = $this->factory->getSingleton($className, $args);
     }
 
     public function thenBothInstancesShouldBeTheSameObject() {
