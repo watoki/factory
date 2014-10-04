@@ -126,10 +126,13 @@ class PropertyInjectionTest extends Specification {
 
         $this->fix->whenITryToGet_FromTheFactory('CascadingPropertyInjection');
         $this->fix->thenA_ShouldBeThrown(InjectionException::$CLASS);
-        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting dependency [foo] of [CascadingPropertyInjection]: ' .
-                'Error while injecting constructor of [CascadingConstructorInjection]: ' .
-                'Error while injecting dependency [baz] of [CascadingAnnotationInjection]: ' .
-                'Could not find [NotExisting].');
+        $this->fix->thenTheExceptionMessageShouldContain(
+            'Error while injecting dependency [foo] of [CascadingPropertyInjection]: ' .
+            'Error while injecting constructor of [CascadingConstructorInjection]: ' .
+            'Cannot inject method [CascadingConstructorInjection::__construct]: ' .
+            'Cannot fill parameter [bar] of [CascadingConstructorInjection::__construct]: ' .
+            'Error while injecting dependency [baz] of [CascadingAnnotationInjection]: ' .
+            'Could not find [NotExisting].');
     }
 
     /** @var DefaultProvider */

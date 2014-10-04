@@ -1,6 +1,8 @@
 <?php
 namespace watoki\factory;
 
+use watoki\factory\exception\InjectionException;
+
 class MethodAnalyzer {
 
     private $method;
@@ -21,12 +23,18 @@ class MethodAnalyzer {
             try {
                 $argArray[$param->getName()] = $this->fillParameter($param, $args, $factory);
             } catch (\InvalidArgumentException $e) {
-                $methodName = $this->method->getDeclaringClass()->getName() . '::' . $this->method->getName();
-                throw new \InvalidArgumentException("Cannot fill parameter [{$param->getName()}] of [$methodName]: "
-                        . $e->getMessage(), 0, $e);
+                $this->throwException($param, $e);
+            } catch (InjectionException $ie) {
+                $this->throwException($param, $ie);
             }
         }
         return $argArray;
+    }
+
+    private function throwException(\ReflectionParameter $param, \Exception $e) {
+        $methodName = $this->method->getDeclaringClass()->getName() . '::' . $this->method->getName();
+        throw new \InvalidArgumentException("Cannot fill parameter [{$param->getName()}] of [$methodName]: "
+            . $e->getMessage(), 0, $e);
     }
 
     public function normalize(array $args) {
