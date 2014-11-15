@@ -13,17 +13,17 @@
         }
     ],
     "require": {
-        "nikic/php-parser": "1.*",
-        "php": ">=5.3.8"
+        "php": ">=5.3.8",
+        "watoki/reflect": "*"
     },
     "require-dev": {
         "watoki/scrut":"*"
     },
     "autoload": {
-        "psr-0": {
-            "watoki\\factory": "src/",
-            "spec\\watoki\\factory": ""
-        }
+        "psr-0": { "watoki\\factory": "src/" }
+    },
+    "autoload-dev": {
+        "psr-0": { "spec\\watoki\\factory": "" }
     },
     "minimum-stability": "dev"
 }

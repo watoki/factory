@@ -2,6 +2,8 @@
 namespace watoki\factory;
 
 use watoki\factory\exception\InjectionException;
+use watoki\reflect\MethodAnalyzer;
+use watoki\reflect\ClassResolver;
 
 class Injector {
 
@@ -51,7 +53,10 @@ class Injector {
     public function injectMethodArguments(\ReflectionMethod $method, array $args) {
         $analyzer = new MethodAnalyzer($method);
         try {
-            return $analyzer->fillParameters($args, $this->factory);
+            $factory = $this->factory;
+            return $analyzer->fillParameters($args, function ($class) use ($factory) {
+                return $factory->getInstance($class);
+            });
         } catch (\InvalidArgumentException $e) {
             throw new InjectionException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
                 . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);

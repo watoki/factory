@@ -266,7 +266,10 @@ class ConstructorInjectionTest extends Specification {
 
         $this->fix->whenITryToGet_FromTheFactory('InvalidConstructorInjection');
         $this->fix->thenA_ShouldBeThrown(InjectionException::$CLASS);
-        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting constructor of [InvalidConstructorInjection]: Class NonExistentCLass does not exist');
+        $this->fix->thenTheExceptionMessageShouldContain('Error while injecting constructor of [InvalidConstructorInjection]: ' .
+            'Cannot inject method [InvalidConstructorInjection::__construct]: ' .
+            'Cannot fill parameter [one] of [InvalidConstructorInjection::__construct]: ' .
+            'Class NonExistentCLass does not exist');
     }
 
 }
