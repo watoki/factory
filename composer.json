@@ -17,13 +17,13 @@
         "watoki/reflect": "*"
     },
     "require-dev": {
-        "watoki/scrut":"*"
+        "watoki/scrut": "*"
     },
     "autoload": {
-        "psr-0": { "watoki\\factory": "src/" }
-    },
-    "autoload-dev": {
-        "psr-0": { "spec\\watoki\\factory": "" }
+        "psr-0": {
+            "watoki\\factory": "src/",
+            "spec\\watoki\\factory": ""
+        }
     },
     "minimum-stability": "dev"
 }
