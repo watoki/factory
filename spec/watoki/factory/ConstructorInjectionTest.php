@@ -98,7 +98,7 @@ class ConstructorInjectionTest extends Specification {
         $this->fix->whenITryToGet_FromTheFactory('OnlyInjectIfParameterIsMarked');
         $this->fix->thenAnExceptionShouldBeThrown();
         $this->fix->thenTheExceptionMessageShouldContain("Cannot fill parameter [arg3]");
-        $this->fix->thenTheExceptionMessageShouldContain("Argument not given and not marked as injectable.");
+        $this->fix->thenTheExceptionMessageShouldContain("Argument not given and not injectable.");
     }
 
     public function testDoNotInjectDefaultArgument() {
@@ -233,7 +233,7 @@ class ConstructorInjectionTest extends Specification {
         $this->fix->givenTheClassDefinition('interface InterfaceDependency {}');
         $this->fix->givenTheClassDefinition('class HasInterfaceDependency {
             /**
-             * @param $itsAbstract
+             * @param $itsAbstract <-
              */
             function __construct(InterfaceDependency $itsAbstract) {}
         }');
@@ -270,6 +270,17 @@ class ConstructorInjectionTest extends Specification {
             'Cannot inject method [InvalidConstructorInjection::__construct]: ' .
             'Cannot fill parameter [one] of [InvalidConstructorInjection::__construct]: ' .
             'Class NonExistentCLass does not exist');
+    }
+
+    public function testConfigureMarker() {
+        $this->fix->givenTheClassDefinition('class ConstructorWithoutMarker {
+            public function __construct(StdClass $one) {
+                $this->one = $one;
+            }
+        }');
+        $this->fix->givenIConfigureTheProviderFor_ToInjectAnyArgument('ConstructorWithoutMarker');
+        $this->fix->whenIGet_FromTheFactory('ConstructorWithoutMarker');
+        $this->fix->thenTheTheProperty_OfTheObjectShouldBeAnInstanceOf('one', 'StdClass');
     }
 
 }

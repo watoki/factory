@@ -16,6 +16,11 @@ class DefaultProvider extends MinimalProvider {
     function __construct(Factory $factory) {
         parent::__construct($factory);
 
+        $this->setParameterFilter(function (\ReflectionParameter $parameter) {
+            $pattern = '/@param.+\$' . $parameter->getName() . '.+' . DefaultProvider::INJECTION_TOKEN . '/';
+            return preg_match($pattern, $parameter->getDeclaringFunction()->getDocComment());
+        });
+
         $this->annotationFilter = function ($annotation) {
             return strpos($annotation, DefaultProvider::INJECTION_TOKEN) !== false;
         };

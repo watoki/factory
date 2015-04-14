@@ -2,6 +2,7 @@
 namespace spec\watoki\factory;
 
 use watoki\factory\Factory;
+use watoki\factory\providers\DefaultProvider;
 use watoki\scrut\Fixture;
 
 class FactoryFixture extends Fixture {
@@ -26,6 +27,14 @@ class FactoryFixture extends Fixture {
         parent::setUp();
         self::$loaded = array();
         $this->factory = new Factory();
+    }
+
+    public function givenIConfigureTheProviderFor_ToInjectAnyArgument($class) {
+        $provider = new DefaultProvider($this->factory);
+        $provider->setParameterFilter(function () {
+            return true;
+        });
+        $this->factory->setProvider($class, $provider);
     }
 
     public function givenTheClass_InTheNamespace($className, $namespace) {

@@ -7,8 +7,6 @@ use watoki\reflect\ClassResolver;
 
 class Injector {
 
-    const INJECTION_MARKER = '<-';
-
     /** @var bool */
     private $throwException = true;
 
@@ -23,7 +21,14 @@ class Injector {
         $this->throwException = $throw;
     }
 
-    public function injectConstructor($class, $args) {
+    /**
+     * @param string $class
+     * @param array $args
+     * @param callable $parameterFilter
+     * @return object An instance of $class
+     * @throws InjectionException
+     */
+    public function injectConstructor($class, $args, $parameterFilter) {
         $reflection = new \ReflectionClass($class);
 
         if ($reflection->isAbstract() || $reflection->isInterface()) {
@@ -35,28 +40,48 @@ class Injector {
         }
 
         try {
-            return $reflection->newInstanceArgs($this->injectMethodArguments($reflection->getConstructor(), $args));
+            return $reflection->newInstanceArgs($this->injectMethodArguments($reflection->getConstructor(), $args, $parameterFilter));
         } catch (InjectionException $e) {
-            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $e->getMessage());
+            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $e->getMessage(), 0, $e);
         } catch (\ReflectionException $re) {
-            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $re->getMessage());
+            throw new InjectionException('Error while injecting constructor of [' . $reflection->getName() . ']: ' . $re->getMessage(), 0, $re);
         }
     }
 
-    public function injectMethod($object, $method, $args = array()) {
+    /**
+     * @param object $object Object to call method on
+     * @param string $method Name of the method
+     * @param array $args
+     * @param null|callable $parameterFilter If omitted, all missing arguments are injected
+     * @return mixed The return value of the method
+     * @throws InjectionException
+     */
+    public function injectMethod($object, $method, $args = array(), $parameterFilter = null) {
+        $parameterFilter = $parameterFilter ?: function () {
+            return true;
+        };
+
         $reflection = new \ReflectionMethod($object, $method);
-        $args = $this->injectMethodArguments($reflection, $args);
+        $args = $this->injectMethodArguments($reflection, $args, $parameterFilter);
 
         return $reflection->invokeArgs($object, $args);
     }
 
-    public function injectMethodArguments(\ReflectionMethod $method, array $args) {
+    /**
+     * @param \ReflectionMethod $method
+     * @param array $args
+     * @param callable $parameterFilter
+     * @return array Of the injected arguments
+     * @throws InjectionException
+     */
+    public function injectMethodArguments(\ReflectionMethod $method, array $args, $parameterFilter) {
         $analyzer = new MethodAnalyzer($method);
         try {
             $factory = $this->factory;
-            return $analyzer->fillParameters($args, function ($class) use ($factory) {
+            $injector = function ($class) use ($factory) {
                 return $factory->getInstance($class);
-            });
+            };
+            return $analyzer->fillParameters($args, $injector, $parameterFilter);
         } catch (\InvalidArgumentException $e) {
             throw new InjectionException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
                 . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
