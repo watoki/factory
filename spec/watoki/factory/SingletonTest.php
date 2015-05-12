@@ -10,11 +10,11 @@ use watoki\scrut\Specification;
  */
 class SingletonTest extends Specification {
 
-    public function testSingleton() {
+    public function testSingletonForOwnClass() {
         $this->fix->givenTheClassDefinition('class Singleton {
             /** @param $factory <- */
             function __construct(\watoki\factory\Factory $factory) {
-                $factory->setSingleton(__CLASS__, $this);
+                $factory->setSingleton($this);
             }
         }');
         $this->fix->whenIGet_FromTheFactory('Singleton');
@@ -22,36 +22,16 @@ class SingletonTest extends Specification {
         $this->fix->thenBothInstancesShouldBeTheSameObject();
     }
 
+    public function testSingletonForOtherClass() {
+        $this->fix->givenTheClassDefinition('class DateTimeSingleton {}');
+        $this->fix->whenISetAnInstanceOf_AsASingletonFor('DateTimeSingleton', 'DateTime');
+        $this->fix->whenIGet_FromTheFactory('DateTime');
+        $this->fix->thenTheObjectShouldBeAnInstanceOf("DateTimeSingleton");
+    }
+
     public function testNonExistingSingleton() {
-        $this->fix->whenITryToGetTheSingleton('NonExistingSingleton');
+        $this->fix->whenITryToGet_FromTheFactory('NonExistingSingleton');
         $this->fix->thenAnExceptionShouldBeThrown();
-    }
-
-    public function testGetExistingSingleton() {
-        $this->fix->givenTheClassDefinition('class GetExistingSingleton {
-            /** @param $factory <- */
-            function __construct(\watoki\factory\Factory $factory, $arg) {
-                $factory->setSingleton(__CLASS__, $this);
-                $this->arg = $arg;
-            }
-        }');
-        $this->fix->whenIGet_WithArguments_FromTheFactory('GetExistingSingleton', array('arg' => 'Special Argument'));
-        $this->fix->whenIGetTheSingleton('GetExistingSingleton');
-        $this->fix->thenTheObjectShouldBeAnInstanceOf('GetExistingSingleton');
-        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('arg', 'Special Argument');
-    }
-
-    public function testCreateNewSingleton() {
-        $this->fix->givenTheClassDefinition('class CreateNewSingleton {
-            function __construct($arg) {
-                $this->arg = $arg;
-            }
-        }');
-        $this->fix->whenIGetTheSingleton_WithTheArguments('CreateNewSingleton', array('Hello'));
-        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('arg', 'Hello');
-
-        $this->fix->whenIGetTheSingleton('CreateNewSingleton');
-        $this->fix->thenTheTheProperty_OfTheObjectShouldBe('arg', 'Hello');
     }
 
 }

@@ -100,16 +100,12 @@ class FactoryFixture extends Fixture {
         }
     }
 
-    public function whenITryToGetTheSingleton($className) {
-        try {
-            $this->whenIGetTheSingleton($className);
-        } catch (\Exception $e) {
-            $this->caught = $e;
-        }
-    }
-
     public function whenIGet_FromTheFactoryAgain($className) {
         $this->instance2 = $this->factory->getInstance($className);
+    }
+
+    public function whenISetAnInstanceOf_AsASingletonFor($singleton, $class) {
+        $this->factory->setSingleton(new $singleton, $class);
     }
 
     public function thenAnExceptionShouldBeThrown() {
@@ -119,14 +115,6 @@ class FactoryFixture extends Fixture {
     public function thenA_ShouldBeThrown($class) {
         $this->spec->assertNotNull($this->caught);
         $this->spec->assertInstanceOf($class, $this->caught);
-    }
-
-    public function whenIGetTheSingleton($className) {
-        $this->instance = $this->factory->getSingleton($className);
-    }
-
-    public function whenIGetTheSingleton_WithTheArguments($className, $args) {
-        $this->instance = $this->factory->getSingleton($className, $args);
     }
 
     public function thenBothInstancesShouldBeTheSameObject() {

@@ -2,18 +2,17 @@
 namespace watoki\factory;
 
 use watoki\factory\providers\DefaultProvider;
+use watoki\factory\providers\SingletonProvider;
 
 class Factory {
 
     static $CLASS = __CLASS__;
 
-    private $singletons = array();
-
     /** @var array|Provider[] */
     private $providers = array();
 
     function __construct() {
-        $this->setSingleton(get_class($this), $this);
+        $this->setSingleton($this);
         $this->setProvider('stdClass', new DefaultProvider($this));
     }
 
@@ -28,44 +27,18 @@ class Factory {
      * @throws \Exception If the class or an injected class cannot be constructed
      */
     public function getInstance($class, $args = array()) {
-        $normalized = $this->normalizeClass($class);
-
-        if (isset($this->singletons[$normalized])) {
-            return $this->singletons[$normalized];
-        }
-
-        return $this->findMatchingProvider($class)->provide($class, $args);
+        return $this->findMatchingProvider($this->normalizeClass($class))->provide($class, $args);
     }
 
     /**
-     * Returns the previously as singleton registered instance or creates one as singleton.
-     *
-     * If $args are provided, a new singleton instance will be created.
-     *
-     * @param string $class
-     * @param null|array $args
-     * @throws \Exception If no $args are provided and no singleton of $class is registered.
-     * @return mixed The already existing instance of the given class
-     */
-    public function getSingleton($class, $args = null) {
-        $normalized = $this->normalizeClass($class);
-
-        if (isset($this->singletons[$normalized])) {
-            return $this->singletons[$normalized];
-        } else if (!is_null($args)) {
-            return $this->setSingleton($class, $this->getInstance($class, $args));
-        } else {
-            throw new \Exception("Instance of [$class] does not exist.");
-        }
-    }
-
-    /**
-     * @param string $class
      * @param object $instance
-     * @return object The instance
+     * @param string|null $class If omitted, the class of the instance is used
+     * @return object The $instance
      */
-    public function setSingleton($class, $instance) {
-        $this->singletons[$this->normalizeClass($class)] = $instance;
+    public function setSingleton($instance, $class = null) {
+        $class = $class ?: get_class($instance);
+
+        $this->setProvider($class, new SingletonProvider($instance));
         return $instance;
     }
 
