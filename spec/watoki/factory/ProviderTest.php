@@ -11,6 +11,7 @@ use watoki\scrut\Specification;
 class ProviderTest extends Specification {
 
     public function testFindProviderDirectly() {
+        $this->factoryFix->givenTheClassDefinition('class MyClass {}');
         $this->givenTheProvider_Providing('SingleMindedProvider', 'return json_decode(\'{"nothing":"just this"}\');');
         $this->givenIHaveSet_ToProvideFor('SingleMindedProvider', 'MyClass');
 
@@ -37,6 +38,22 @@ class ProviderTest extends Specification {
         $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('provided', 'yes');
     }
 
+    public function testFindProviderForInterface() {
+        $this->factoryFix->givenTheClassDefinition('
+            interface BaseInterface {}
+            interface SomeInterface {}
+            interface SomeOtherInterface extends BaseInterface {}
+            class SomeImplementation implements SomeInterface, SomeOtherInterface {}
+        ');
+
+        $this->givenTheProvider_Providing('InterfaceProvider', 'return new \DateTime;');
+        $this->givenIHaveSet_ToProvideFor('InterfaceProvider', 'BaseInterface');
+
+        $this->factoryFix->whenIGet_FromTheFactory('SomeImplementation');
+
+        $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('DateTime');
+    }
+
     public function testFindSpecificProviderFirst() {
         $this->factoryFix->givenTheClassDefinition('
             class Base2Class {}
@@ -58,10 +75,11 @@ class ProviderTest extends Specification {
     }
 
     public function testNormalizeClassName() {
-        $this->givenTheProvider_Providing('JustAProvide', 'return json_decode(\'{"nothing":"just this"}\');');
-        $this->givenIHaveSet_ToProvideFor('JustAProvide', '\My\Class');
+        $this->factoryFix->givenTheClassDefinition('namespace My; class FooClass {}');
+        $this->givenTheProvider_Providing('JustAProvider', 'return json_decode(\'{"nothing":"just this"}\');');
+        $this->givenIHaveSet_ToProvideFor('JustAProvider', '\My\FooClass');
 
-        $this->factoryFix->whenIGet_FromTheFactory('my\class');
+        $this->factoryFix->whenIGet_FromTheFactory('my\fooclass');
 
         $this->factoryFix->thenTheObjectShouldBeAnInstanceOf('stdClass');
         $this->factoryFix->thenTheTheProperty_OfTheObjectShouldBe('nothing', 'just this');

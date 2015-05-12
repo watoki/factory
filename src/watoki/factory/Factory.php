@@ -27,7 +27,7 @@ class Factory {
      * @throws \Exception If the class or an injected class cannot be constructed
      */
     public function getInstance($class, $args = array()) {
-        return $this->findMatchingProvider($this->normalizeClass($class))->provide($class, $args);
+        return $this->findMatchingProvider($class)->provide($class, $args);
     }
 
     /**
@@ -47,20 +47,25 @@ class Factory {
     }
 
     private function findMatchingProvider($class) {
-        $isHHVM = defined('HHVM_VERSION');
+        $reflection = new \ReflectionClass($class);
 
-        // fix for a hhvm issue, see https://github.com/facebook/hhvm/issues/2097
-        $parentClasses = $isHHVM ? class_parents($class) : array();
-
-        while ($class) {
-            $normalized = $this->normalizeClass($class);
-            foreach ($this->providers as $key => $provider) {
-                if ($normalized == $key) {
-                    return $provider;
-                }
+        while ($reflection) {
+            $normalized = $this->normalizeClass($reflection->getName());
+            if (array_key_exists($normalized, $this->providers)) {
+                return $this->providers[$normalized];
             }
-            $class = $isHHVM ? array_shift($parentClasses) : get_parent_class($class);
+
+            $reflection = $reflection->getParentClass();
         }
+
+        $reflection = new \ReflectionClass($class);
+        foreach ($reflection->getInterfaces() as $interface) {
+            $normalized = $this->normalizeClass($interface->getName());
+            if (array_key_exists($normalized, $this->providers)) {
+                return $this->providers[$normalized];
+            }
+        }
+
         return $this->providers['stdclass'];
     }
 
