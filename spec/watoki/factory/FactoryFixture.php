@@ -23,10 +23,18 @@ class FactoryFixture extends Fixture {
 
     private static $alreadyDefined = array();
 
+    private $tmpDir;
+
     public function setUp() {
         parent::setUp();
         self::$loaded = array();
         $this->factory = new Factory();
+        $this->tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid();
+        @mkdir($this->tmpDir);
+
+        $this->spec->undos[] = function () {
+            @rmdir($this->tmpDir);
+        };
     }
 
     public function givenIConfigureTheProviderFor_ToInjectAnyArgument($class) {
@@ -63,16 +71,14 @@ class FactoryFixture extends Fixture {
             return;
         }
         self::$alreadyDefined[] = $hash;
-        $dir = __DIR__ . '/tmp';
-        $file = $dir . '/' . $this->spec->getName() . $this->counter++ . '.php';
-        @mkdir($dir);
+        $file = $this->tmpDir . DIRECTORY_SEPARATOR . $this->spec->getName() . $this->counter++ . '.php';
         file_put_contents($file, "<?php {$definition}");
         /** @noinspection PhpIncludeInspection */
         include $file;
 
-        $this->spec->undos[] = function () use ($dir, $file) {
+        $this->spec->undos[] = function () use ($file) {
             @unlink($file);
-            @rmdir($dir);
+            @rmdir($this->tmpDir);
         };
     }
 
