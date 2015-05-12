@@ -32,8 +32,9 @@ class FactoryFixture extends Fixture {
         $this->tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid();
         @mkdir($this->tmpDir);
 
-        $this->spec->undos[] = function () {
-            @rmdir($this->tmpDir);
+        $tmpDir = $this->tmpDir;
+        $this->spec->undos[] = function () use ($tmpDir) {
+            @rmdir($tmpDir);
         };
     }
 
@@ -76,9 +77,10 @@ class FactoryFixture extends Fixture {
         /** @noinspection PhpIncludeInspection */
         include $file;
 
-        $this->spec->undos[] = function () use ($file) {
+        $tmpDir = $this->tmpDir;
+        $this->spec->undos[] = function () use ($file, $tmpDir) {
             @unlink($file);
-            @rmdir($this->tmpDir);
+            @rmdir($tmpDir);
         };
     }
 
