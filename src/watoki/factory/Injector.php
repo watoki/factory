@@ -10,11 +10,17 @@ class Injector {
     /** @var bool */
     private $throwException = true;
 
-    /** @var Factory <- */
+    /** @var Factory */
     private $factory;
 
-    public function __construct(Factory $factory) {
+    /** @var callable */
+    private $injector;
+
+    public function __construct(Factory $factory, callable $internalInjector = null) {
         $this->factory = $factory;
+        $this->injector = $internalInjector ?: function ($class) use ($factory) {
+            return $factory->getInstance($class);
+        };
     }
 
     public function setThrowWhenCantInjectProperty($throw) {
@@ -77,11 +83,7 @@ class Injector {
     public function injectMethodArguments(\ReflectionMethod $method, array $args, $parameterFilter) {
         $analyzer = new MethodAnalyzer($method);
         try {
-            $factory = $this->factory;
-            $injector = function ($class) use ($factory) {
-                return $factory->getInstance($class);
-            };
-            return $analyzer->fillParameters($args, $injector, $parameterFilter);
+            return $analyzer->fillParameters($args, $this->injector, $parameterFilter);
         } catch (\InvalidArgumentException $e) {
             throw new InjectionException("Cannot inject method [{$method->getDeclaringClass()->getName()}"
                 . "::{$method->getName()}]: " . $e->getMessage(), 0, $e);
