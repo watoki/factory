@@ -10,14 +10,10 @@ class Injector {
     /** @var bool */
     private $throwException = true;
 
-    /** @var Factory */
-    private $factory;
-
     /** @var callable */
     private $injector;
 
     public function __construct(Factory $factory, callable $internalInjector = null) {
-        $this->factory = $factory;
         $this->injector = $internalInjector ?: function ($class) use ($factory) {
             return $factory->getInstance($class);
         };
@@ -163,7 +159,8 @@ class Injector {
             }
         }
 
-        $instance = $this->factory->getInstance($type);
+        $instance = call_user_func($this->injector, $type);
+
         if ($classReflection->hasProperty($propertyName)) {
             $reflectionProperty = $classReflection->getProperty($propertyName);
             $reflectionProperty->setAccessible(true);
