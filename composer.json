@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=5.3.8",
-        "watoki/reflect": "0.3"
+        "watoki/reflect": "dev-master"
     },
     "require-dev": {
         "watoki/scrut": "0.3"
