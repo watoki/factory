@@ -5,6 +5,12 @@ use watoki\factory\exception\InjectionException;
 use watoki\reflect\MethodAnalyzer;
 use watoki\reflect\ClassResolver;
 
+/**
+ * Class Injector
+ * Inject objects, params into an instance
+ *
+ * @package watoki\factory
+ */
 class Injector {
 
     /** @var bool */
@@ -19,15 +25,24 @@ class Injector {
         };
     }
 
+    /**
+     * Indicate if an exception must be thrown if an error occur when injecting
+     *
+     * @param bool $throw Indicate if an exception must be thrown
+     */
     public function setThrowWhenCantInjectProperty($throw) {
         $this->throwException = $throw;
     }
 
     /**
-     * @param string $class
-     * @param array $args
-     * @param callable $parameterFilter
+     * Instantiate a new object by its constructor
+     *
+     * @param string   $class           The class name to instantiate
+     * @param array    $args            List of arguments to use
+     * @param callable $parameterFilter Callback function for filtering parameters to inject
+     *
      * @return object An instance of $class
+     *
      * @throws InjectionException
      */
     public function injectConstructor($class, $args, $parameterFilter) {
@@ -51,11 +66,15 @@ class Injector {
     }
 
     /**
-     * @param object $object Object to call method on
-     * @param string $method Name of the method
-     * @param array $args
+     * Inject object/params in an object method
+     *
+     * @param object        $object          Object to call method on
+     * @param string        $method          Name of the method
+     * @param array         $args            List of params to use
      * @param null|callable $parameterFilter If omitted, all missing arguments are injected
+     *
      * @return mixed The return value of the method
+     *
      * @throws InjectionException
      */
     public function injectMethod($object, $method, $args = array(), $parameterFilter = null) {
@@ -70,10 +89,14 @@ class Injector {
     }
 
     /**
-     * @param \ReflectionMethod $method
-     * @param array $args
-     * @param callable $parameterFilter
+     * Create the list of all arguments to inject in a method
+     *
+     * @param \ReflectionMethod $method          The reflection method
+     * @param array             $args            List of params to inject
+     * @param callable          $parameterFilter Callback function for filtering parameters to inject
+     *
      * @return array Of the injected arguments
+     *
      * @throws InjectionException
      */
     public function injectMethodArguments(\ReflectionMethod $method, array $args, $parameterFilter) {
@@ -87,9 +110,12 @@ class Injector {
     }
 
     /**
-     * @param object $object The object that the properties are injected into
-     * @param callable $filter Function to determine if the passed property annotation should be included
+     * Inject value into object properties by reading "@property" (magic properties) annotation (include inherited).
+     *
+     * @param object           $object  The object that the properties are injected into
+     * @param callable         $filter  Function to determine if the passed property annotation should be included
      * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
+     *
      * @throws InjectionException
      */
     public function injectPropertyAnnotations($object, $filter, \ReflectionClass $context = null) {
@@ -99,9 +125,11 @@ class Injector {
             $resolver = new ClassResolver($classReflection);
 
             $matches = array();
+            // RegEx to find @property annotations
             preg_match_all('/@property\s+(\S+)\s+\$?(\S+).*/', $classReflection->getDocComment(), $matches);
 
             foreach ($matches[0] as $i => $match) {
+                // Filtering annotation with the filter class
                 if (!call_user_func($filter, trim($match))) {
                     continue;
                 }
@@ -111,14 +139,18 @@ class Injector {
                 $this->tryToInjectProperty($object, $propertyName, $resolver, $class);
             }
 
+            // Continue with the parent class (search for inherited properties)
             $classReflection = $classReflection->getParentClass();
         }
     }
 
     /**
-     * @param object $object The object that the properties are injected into
-     * @param callable $filter Function to determine if the passed \ReflectionProperty should be included
+     * Inject value into object properties.
+     *
+     * @param object           $object  The object that the properties are injected into
+     * @param callable         $filter  Function to determine if the passed \ReflectionProperty should be included
      * @param \ReflectionClass $context The class to read the property annotations from (if not class of object)
+     *
      * @throws InjectionException
      */
     public function injectProperties($object, $filter, \ReflectionClass $context = null) {
@@ -126,6 +158,7 @@ class Injector {
 
         foreach ($classReflection->getProperties() as $property) {
             $matches = array();
+            // RegEx to find @var annotation
             preg_match('/@var\s+(\S+).*/', $property->getDocComment(), $matches);
 
             if (empty($matches) || !$filter($property)) {
@@ -137,6 +170,17 @@ class Injector {
         }
     }
 
+    /**
+     * Inject a property into an object.
+     * Wrapper of self::injectProperty, to enhance error message.
+     *
+     * @param object        $targetObject The object where the property must be injected
+     * @param string        $propertyName The name of the property to inject
+     * @param ClassResolver $resolver     The class resolver
+     * @param string        $class        The type (class name) of the property
+     *
+     * @throws InjectionException
+     */
     private function tryToInjectProperty($targetObject, $propertyName, ClassResolver $resolver, $class) {
         try {
             $this->injectProperty($targetObject, $propertyName, $resolver, $class);
@@ -147,6 +191,16 @@ class Injector {
         }
     }
 
+    /**
+     * Inject a property into an object.
+     *
+     * @param object        $targetObject The object where the property must be injected
+     * @param string        $propertyName The name of the property to inject
+     * @param ClassResolver $resolver     The class resolver
+     * @param string        $class        The type (class name) of the property
+     *
+     * @throws InjectionException
+     */
     private function injectProperty($targetObject, $propertyName, ClassResolver $resolver, $class) {
         $type = $resolver->resolve($class);
         $classReflection = new \ReflectionClass($targetObject);
