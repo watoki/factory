@@ -5,6 +5,8 @@ namespace watoki\factory;
  * Interface Provider
  * Describe how to get an instance from a class name and params
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory
  */
 interface Provider

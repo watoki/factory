@@ -9,6 +9,8 @@ use watoki\factory\Provider;
  * Class MinimalProvider
  * A base provider that use injector and a parameter injection filter.
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory\providers
  */
 class MinimalProvider implements Provider

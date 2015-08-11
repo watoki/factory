@@ -9,6 +9,8 @@ use watoki\reflect\ClassResolver;
  * Class Injector
  * Inject objects, params into an instance
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory
  */
 class Injector

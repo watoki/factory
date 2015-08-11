@@ -7,6 +7,8 @@ use watoki\factory\Provider;
  * Class SingletonProvider
  * A singleton provider. When use, the same instance of the class is return.
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory\providers
  */
 class SingletonProvider implements Provider

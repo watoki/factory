@@ -7,6 +7,8 @@ use watoki\factory\Factory;
  * Class DefaultProvider
  * The default provider. Use annotations.
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory\providers
  */
 class DefaultProvider extends MinimalProvider

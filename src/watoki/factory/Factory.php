@@ -8,6 +8,8 @@ use watoki\factory\providers\SingletonProvider;
  * Class Factory.
  * The factory that build all of your object
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory
  */
 class Factory

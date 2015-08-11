@@ -7,6 +7,8 @@ use watoki\factory\Provider;
  * Class CallbackProvider
  * The provider use a user define callback function to have an instance of a class
  *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
  * @package watoki\factory\providers
  */
 class CallbackProvider implements Provider
