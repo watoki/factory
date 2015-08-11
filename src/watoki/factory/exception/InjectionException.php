@@ -7,7 +7,8 @@ namespace watoki\factory\exception;
  *
  * @package watoki\factory\exception
  */
-class InjectionException extends \Exception {
+class InjectionException extends \Exception
+{
     /** @var string The Factory class name */
     public static $CLASS = __CLASS__;
 }

@@ -9,7 +9,8 @@ use watoki\factory\Provider;
  *
  * @package watoki\factory\providers
  */
-class CallbackProvider implements Provider {
+class CallbackProvider implements Provider
+{
 
     /** @var callable */
     private $callback;
@@ -22,12 +23,14 @@ class CallbackProvider implements Provider {
      *
      * @param callable $callback
      */
-    public function __construct($callback) {
+    public function __construct($callback)
+    {
         $this->callback = $callback;
     }
 
     /** {@inheritdoc} */
-    public function provide($class, array $args = array()) {
+    public function provide($class, array $args = array())
+    {
         return call_user_func($this->callback, $class, $args);
     }
 }

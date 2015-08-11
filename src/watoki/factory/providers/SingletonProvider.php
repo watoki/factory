@@ -9,7 +9,8 @@ use watoki\factory\Provider;
  *
  * @package watoki\factory\providers
  */
-class SingletonProvider implements Provider {
+class SingletonProvider implements Provider
+{
 
     private $instance;
 
@@ -18,12 +19,14 @@ class SingletonProvider implements Provider {
      *
      * @param object $instance The instance to use a singleton
      */
-    public function __construct($instance) {
+    public function __construct($instance)
+    {
         $this->instance = $instance;
     }
 
     /** {@inheritdoc} */
-    public function provide($class, array $args = array()) {
+    public function provide($class, array $args = array())
+    {
         return $this->instance;
     }
 }

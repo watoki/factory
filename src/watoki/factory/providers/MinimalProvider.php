@@ -11,7 +11,8 @@ use watoki\factory\Provider;
  *
  * @package watoki\factory\providers
  */
-class MinimalProvider implements Provider {
+class MinimalProvider implements Provider
+{
     /** @var Injector */
     protected $injector;
 
@@ -24,7 +25,8 @@ class MinimalProvider implements Provider {
      *
      * @param Factory $factory The classes factory
      */
-    public function __construct(Factory $factory) {
+    public function __construct(Factory $factory)
+    {
         $this->injector = new Injector($factory);
         $this->parameterFilter = function () {
             return true;
@@ -32,7 +34,8 @@ class MinimalProvider implements Provider {
     }
 
     /** {@inheritdoc} */
-    public function provide($class, array $args = array()) {
+    public function provide($class, array $args = array())
+    {
         return $this->injector->injectConstructor($class, $args, $this->parameterFilter);
     }
 
@@ -41,7 +44,8 @@ class MinimalProvider implements Provider {
      *
      * @return callable
      */
-    public function getParameterFilter() {
+    public function getParameterFilter()
+    {
         return $this->parameterFilter;
     }
 
@@ -53,7 +57,8 @@ class MinimalProvider implements Provider {
      *
      * @param callable $parameterFilter Receives a \ReflectionParameter as argument
      */
-    public function setParameterFilter($parameterFilter) {
+    public function setParameterFilter($parameterFilter)
+    {
         $this->parameterFilter = $parameterFilter;
     }
 }

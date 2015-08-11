@@ -7,13 +7,14 @@ namespace watoki\factory;
  *
  * @package watoki\factory
  */
-interface Provider {
+interface Provider
+{
 
     /**
      * Get an instance of the class $class with the parameters $args
      *
      * @param string $class
-     * @param array  $args
+     * @param array $args
      *
      * @return object The $class instance
      */

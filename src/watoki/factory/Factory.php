@@ -10,7 +10,8 @@ use watoki\factory\providers\SingletonProvider;
  *
  * @package watoki\factory
  */
-class Factory {
+class Factory
+{
     /** @var string The Factory class name */
     public static $CLASS = __CLASS__;
 
@@ -21,7 +22,8 @@ class Factory {
      * Initialize the class.
      * (Define the default provider, and self register as singleton)
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->setSingleton($this);
         $this->setProvider('stdClass', new DefaultProvider($this));
     }
@@ -32,25 +34,27 @@ class Factory {
      * If the class was registed as singleton, the previous instance is returned regardless of the arguments.
      *
      * @param string $class The name (or alias) of the class to get
-     * @param array  $args  Constructor arguments that cannot be provided by the factory (indexed by parameter name)
+     * @param array $args Constructor arguments that cannot be provided by the factory (indexed by parameter name)
      *
      * @return mixed An instance of the given class
      *
      * @throws \Exception If the class or an injected class cannot be constructed
      */
-    public function getInstance($class, $args = array()) {
+    public function getInstance($class, $args = array())
+    {
         return $this->findMatchingProvider($class)->provide($class, $args);
     }
 
     /**
      * Define a singleton
      *
-     * @param object      $instance The singleton instance
-     * @param string|null $class    If omitted, the class of the instance is used
+     * @param object $instance The singleton instance
+     * @param string|null $class If omitted, the class of the instance is used
      *
      * @return object The $instance
      */
-    public function setSingleton($instance, $class = null) {
+    public function setSingleton($instance, $class = null)
+    {
         $class = $class ?: get_class($instance);
 
         $this->setProvider($class, new SingletonProvider($instance));
@@ -60,10 +64,11 @@ class Factory {
     /**
      * Define a provider of a class name
      *
-     * @param string   $class    The name (or alias) of the class
+     * @param string $class The name (or alias) of the class
      * @param Provider $provider The class provider to use for this class name
      */
-    public function setProvider($class, Provider $provider) {
+    public function setProvider($class, Provider $provider)
+    {
         $this->providers[$this->normalizeClass($class)] = $provider;
     }
 
@@ -74,7 +79,8 @@ class Factory {
      *
      * @return Provider The provider to use
      */
-    private function findMatchingProvider($class) {
+    private function findMatchingProvider($class)
+    {
         $reflection = new \ReflectionClass($class);
 
         /*
@@ -113,7 +119,8 @@ class Factory {
      * @param string $class The class name to transform
      * @return string The "ready to use as key" class name
      */
-    private function normalizeClass($class) {
+    private function normalizeClass($class)
+    {
         return trim(strtolower($class), '\\');
     }
 }

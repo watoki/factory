@@ -9,7 +9,8 @@ use watoki\factory\Factory;
  *
  * @package watoki\factory\providers
  */
-class DefaultProvider extends MinimalProvider {
+class DefaultProvider extends MinimalProvider
+{
     /** The injection token reads in annotation */
     const INJECTION_TOKEN = '<-';
     /** @var \Closure|callable The function to find if a property (magic variable) must be injected or not */
@@ -25,7 +26,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @param Factory $factory The classes factory
      */
-    function __construct(Factory $factory) {
+    function __construct(Factory $factory)
+    {
         parent::__construct($factory);
 
         /*
@@ -50,7 +52,8 @@ class DefaultProvider extends MinimalProvider {
     }
 
     /** {@inheritdoc} */
-    public function provide($class, array $args = array()) {
+    public function provide($class, array $args = array())
+    {
         $instance = parent::provide($class, $args);
 
         if ($this->injectionMethod && method_exists($instance, $this->injectionMethod)) {
@@ -72,7 +75,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @param callable $filter
      */
-    public function setAnnotationFilter($filter) {
+    public function setAnnotationFilter($filter)
+    {
         $this->annotationFilter = $filter;
     }
 
@@ -81,7 +85,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @return callable
      */
-    public function getAnnotationFilter() {
+    public function getAnnotationFilter()
+    {
         return $this->annotationFilter;
     }
 
@@ -93,7 +98,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @return callable
      */
-    public function getPropertyFilter() {
+    public function getPropertyFilter()
+    {
         return $this->propertyFilter;
     }
 
@@ -102,7 +108,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @param callable $propertyFilter
      */
-    public function setPropertyFilter($propertyFilter) {
+    public function setPropertyFilter($propertyFilter)
+    {
         $this->propertyFilter = $propertyFilter;
     }
 
@@ -111,7 +118,8 @@ class DefaultProvider extends MinimalProvider {
      *
      * @param string $injectionMethod
      */
-    public function setInjectionMethod($injectionMethod) {
+    public function setInjectionMethod($injectionMethod)
+    {
         $this->injectionMethod = $injectionMethod;
     }
 }
