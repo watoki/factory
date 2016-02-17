@@ -14,10 +14,10 @@
     ],
     "require": {
         "php": ">=5.3.8",
-        "watoki/reflect": "dev-master"
+        "watoki/reflect": "*"
     },
     "require-dev": {
-        "watoki/scrut": "0.3"
+        "watoki/scrut": "*"
     },
     "autoload": {
         "psr-0": {
