@@ -3,18 +3,32 @@ namespace watoki\factory\providers;
 
 use watoki\factory\Provider;
 
-class SingletonProvider implements Provider {
+/**
+ * Class SingletonProvider
+ * A singleton provider. When use, the same instance of the class is return.
+ *
+ * @author  "Nikolas Martens" <Nikolas.M@rtens.org>
+ * @license MIT
+ * @package watoki\factory\providers
+ */
+class SingletonProvider implements Provider
+{
 
     private $instance;
 
     /**
-     * @param object $instance
+     * Initialize the provider with the instance to use a singleton
+     *
+     * @param object $instance The instance to use a singleton
      */
-    function __construct($instance) {
+    public function __construct($instance)
+    {
         $this->instance = $instance;
     }
 
-    public function provide($class, array $args = array()) {
+    /** {@inheritdoc} */
+    public function provide($class, array $args = array())
+    {
         return $this->instance;
     }
 }
